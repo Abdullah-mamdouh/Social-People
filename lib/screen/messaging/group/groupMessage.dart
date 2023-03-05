@@ -8,9 +8,9 @@ import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/chat_room/group_chat/chatRoom.dart';
 import 'package:sm/screen/home_page/homePage.dart';
-import 'package:sm/screen/theme_mode/theme.dart';
 import 'package:sm/service/authentication.dart';
 
+import '../../../utils/theme_mode/theme.dart';
 import 'groupMessageHelper.dart';
 
 class GroupMessage extends StatefulWidget {
@@ -141,7 +141,7 @@ class _GroupMessageState extends State<GroupMessage> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          color: Provider.of<ThemeColor>(context, listen: false).valueTheme ? constantColors.whiteColor: constantColors.darkColor,
+          //color: Provider.of<ThemeColor>(context, listen: false).valueTheme ? constantColors.whiteColor: constantColors.darkColor,
           child: Column(
             children: [
               AnimatedContainer(
@@ -197,7 +197,7 @@ class _GroupMessageState extends State<GroupMessage> {
                       FloatingActionButton(
                         onPressed: () {
                           if (messageController.text.isNotEmpty) {
-                            messageController.text = 'Send Message';
+                            //messageController.text = 'Send Message';
                             Provider.of<GroupMessageHelper>(context,
                                     listen: false)
                                 .sendMessage(context, widget.documentSnapshot!,

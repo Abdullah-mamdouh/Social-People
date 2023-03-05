@@ -23,14 +23,14 @@ class FirebaseOperation with ChangeNotifier {
     imageUploadTask = imageReferenc.putFile(
         Provider.of<LandingUtils>(context, listen: false).getUserAvatar);
     await imageUploadTask.whenComplete(() {
-      print('Image upload');
+      debugPrint('Image upload');
     });
     imageReferenc.getDownloadURL().then((url) {
       Provider.of<LandingUtils>(context, listen: false).userAvatarUrl =
           url.toString();
-      print(
+      debugPrint(
           'the user profile avatar url => ${Provider.of<LandingUtils>(context, listen: false).getUserAvatar}');
-      print(
+      debugPrint(
           'hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh');
       notifyListeners();
     });
@@ -44,21 +44,21 @@ class FirebaseOperation with ChangeNotifier {
   }
 
   Future initUserDate(BuildContext context) async {
-    print(Provider.of<Authentication>(context, listen: false).getUserUid);
+    debugPrint(Provider.of<Authentication>(context, listen: false).getUserUid);
     return FirebaseFirestore.instance
         .collection('users')
         .doc(Provider.of<Authentication>(context, listen: false).getUserUid)
         .get()
         .then((doc) {
-      print('Fetching user data');
-      print(Provider.of<Authentication>(context, listen: false).getUserUid);
+      debugPrint('Fetching user data');
+      // debugPrint(Provider.of<Authentication>(context, listen: false).getUserUid);
       initUserName = doc['user_name'];
       initUserEmail = doc['user_email'];
       initUserImage = doc['user_image'];
 
-      print(initUserName);
-      print(initUserEmail);
-      print(initUserImage);
+      debugPrint(initUserName);
+      debugPrint(initUserEmail);
+      debugPrint(initUserImage);
 
       notifyListeners();
     });

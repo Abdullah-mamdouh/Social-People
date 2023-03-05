@@ -300,7 +300,7 @@ class ProfileHelper with ChangeNotifier {
                           .map<Widget>((DocumentSnapshot document) {
                         return GestureDetector(
                           onTap:(){
-                            storyWidget.previewAllHighlights(context, document['title']);
+                            storyWidget.previewAllHighlights(context, document['cover']);
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -312,16 +312,16 @@ class ProfileHelper with ChangeNotifier {
                                   CircleAvatar(
                                     backgroundColor:constantColors.darkColor,
                                     backgroundImage:
-                                        NetworkImage(document['cover']),
+                                        NetworkImage(document['cover'],),
                                     radius: 20,
                                   ),
-                                  Text(
+                                  /*Text(
                                     document['title'],
                                     style: TextStyle(
                                         color: constantColors.greenColor,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12),
-                                  )
+                                  )*/
                                 ],
                               ),
                             ),

@@ -213,7 +213,7 @@ class StoryWidget {
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('users')
-                        .doc(Provider.of<Authentication>(context, listen: false)
+                        .doc(Provider.of<Authentication>(context,listen: false)
                             .getUserUid)
                         .collection('highlights')
                         .snapshots(),
@@ -222,7 +222,8 @@ class StoryWidget {
                         return Center(
                           child: CircularProgressIndicator(),
                         );
-                      } else {
+                      }
+                      else if(snapshot.hasData) {
                         return ListView(
                           scrollDirection: Axis.horizontal,
                           children: snapshot.data.docs
@@ -237,7 +238,7 @@ class StoryWidget {
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: new Container(
+                                child: document['cover'] != null ? Container(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
@@ -259,15 +260,17 @@ class StoryWidget {
                                       )
                                     ],
                                   ),
-                                ),
+                                ): const SizedBox(height: 0,width: 0,) ,
                               ),
                             );
                           }).toList(),
                         );
+                      }else{
+                        return Container(width: 0,height: 0,);
                       }
                     },
                   ),
-                  height: MediaQuery.of(context).size.height * 0.1,
+                  //height: MediaQuery.of(context).size.height * 0.1,
                   width: MediaQuery.of(context).size.width,
                 ),
                 Text(
@@ -277,7 +280,9 @@ class StoryWidget {
                       fontWeight: FontWeight.bold,
                       fontSize: 14),
                 ),
-                Container(
+
+                /// At Future
+                /*Container(
                   height: MediaQuery.of(context).size.height * 0.1,
                   width: MediaQuery.of(context).size.width,
                   child: StreamBuilder<QuerySnapshot>(
@@ -315,8 +320,9 @@ class StoryWidget {
                     },
                   ),
                 ),
+                */
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.1,
+                  //height: MediaQuery.of(context).size.height * 0.1,
                   width: MediaQuery.of(context).size.width,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -347,14 +353,14 @@ class StoryWidget {
                           onPressed: () {
                             if (storyHightlightTitleController
                                 .text.isNotEmpty) {
-                              Provider.of<StoriesHepher>(context, listen: false)
-                                  .addStoryToNewAlbum(
-                                      context,
-                                      Provider.of<Authentication>(context,
-                                              listen: false)
-                                          .getUserUid,
-                                      storyHightlightTitleController.text,
-                                      storyImage);
+                              // Provider.of<StoriesHepher>(context, listen: false)
+                              //     .addStoryToNewAlbum(
+                              //         context,
+                              //         Provider.of<Authentication>(context,
+                              //                 listen: false)
+                              //             .getUserUid,
+                              //         storyHightlightTitleController.text,
+                              //         storyImage);
                             } else {
                               showModalBottomSheet(
                                 context: context,
@@ -376,7 +382,7 @@ class StoryWidget {
                 )
               ],
             ),
-            height: MediaQuery.of(context).size.height * 0.4,
+            height: MediaQuery.of(context).size.height * 0.3,
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
                 color: constantColors.darkColor,
@@ -486,14 +492,14 @@ class StoryWidget {
         return Container(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
-          child: StreamBuilder(
+          child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('users')
                 .doc(Provider.of<Authentication>(context, listen: false)
                     .getUserUid)
                 .collection('highlights')
-                .doc(highlighTitle)
-                .collection('stories')
+                // .doc(highlighTitle)
+                // .collection('stories')
                 .snapshots(),
             builder: (context, AsyncSnapshot snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -502,13 +508,13 @@ class StoryWidget {
                 );
               } else {
                 return PageView(
-                  children: snapshot.data.docs.map((DocumentSnapshot document) {
+                  children: snapshot.data.docs.map<Widget>((DocumentSnapshot document) {
                     return Container(
                       height: MediaQuery.of(context).size.height,
                       width: MediaQuery.of(context).size.width,
-                      child: Image.network(document['image']),
+                      child: Image.network(document['cover']),
                     );
-                  }),
+                  }).toList(),
                 );
               }
             },

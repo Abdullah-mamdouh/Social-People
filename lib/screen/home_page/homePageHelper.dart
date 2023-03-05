@@ -32,7 +32,7 @@ class HomePageHelper with ChangeNotifier {
           radius: 35,
           backgroundColor: constantColors.blueGreyColor,
           backgroundImage: NetworkImage(
-              Provider.of<FirebaseOperation>(context, listen: false)
+              Provider.of<FirebaseOperation>(context)
                   .getUserImage),
         )
         )

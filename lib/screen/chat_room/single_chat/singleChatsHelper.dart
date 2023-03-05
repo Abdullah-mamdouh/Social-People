@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/chat_room/single_chat/SingleChatroom.dart';
 import 'package:sm/screen/messaging/single/singleChatMessages.dart';
-import 'package:sm/screen/theme_mode/theme.dart';
 import 'package:sm/service/authentication.dart';
 import 'package:timeago/timeago.dart' as timeago;
 class SingleChatsHelper with ChangeNotifier{

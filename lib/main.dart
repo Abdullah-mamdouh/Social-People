@@ -16,10 +16,10 @@ import 'package:sm/screen/messaging/single/singleChatMessageHelper.dart';
 import 'package:sm/screen/profile/profileHelper.dart';
 import 'package:sm/screen/splash_screen/splashScreen.dart';
 import 'package:sm/screen/stories/storiesHelper.dart';
-import 'package:sm/screen/theme_mode/theme.dart';
 import 'package:sm/service/authentication.dart';
 import 'package:sm/service/firebaseOperation.dart';
 import 'package:sm/utils/postOption.dart';
+import 'package:sm/utils/theme_mode/theme.dart';
 import 'package:sm/utils/uploadPost.dart';
 
 void main() async {
@@ -37,18 +37,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     ConstantColors constantColors = new ConstantColors();
     return MultiProvider(
-      child: MaterialApp(
+      child: ChangeNotifierProvider(
+        create: (context) => ThemeColor(),
+    builder: (context, _) {
+      final themeProvider = Provider.of<ThemeColor>(context);
+      return MaterialApp(
         debugShowCheckedModeBanner: false,
+        themeMode: Provider.of<ThemeColor>(context).themeMode,
+        //themeMode: Provider.of<ThemeHelper>(context).themeMode,
+        theme: MyThemes.lightTheme,
+        darkTheme: MyThemes.darkTheme,
+        home: SplashPage(),
+      );
 
-        theme: ThemeData(
-          accentColor: constantColors.blueColor,
-          fontFamily: 'Poppins',
-          canvasColor: Colors.transparent,
-        ),
-        home: SplashScreen(),
+    }
       ),
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeColor()),
         ChangeNotifierProvider(create: (_) => SingleChatsHelper()),
         ChangeNotifierProvider(create: (_) => SingleChatMessageHelper()),
         ChangeNotifierProvider(create: (_) => GroupMessageHelper()),

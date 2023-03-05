@@ -346,7 +346,7 @@ class PostFunction with ChangeNotifier {
           return Padding(
             padding:  EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
             child: Container(
-              height: MediaQuery.of(context).size.height * 0.75,
+              height: MediaQuery.of(context).size.height * 0.55,
               width: MediaQuery.of(context).size.width,
               child: Column(
                 children: [
@@ -376,7 +376,7 @@ class PostFunction with ChangeNotifier {
                     ),
                   ),
                   Container(
-                    height: MediaQuery.of(context).size.height * 0.6,
+                    height: MediaQuery.of(context).size.height * 0.42,
                     width: MediaQuery.of(context).size.width,
                     child: StreamBuilder(
                       stream: FirebaseFirestore.instance
@@ -613,78 +613,78 @@ class PostFunction with ChangeNotifier {
                   ),
                 ),
               ),
-              Container(
-                height: MediaQuery.of(context).size.height * 0.2,
-                width: MediaQuery.of(context).size.width,
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('posts')
-                      .doc(postId)
-                      .collection('likes')
-                      .snapshots(),
-                  builder: (context, AsyncSnapshot snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else {
-                      return ListView(
-                        children:
-                            snapshot.data.docs.map<Widget>((DocumentSnapshot document) {
-                          return ListTile(
-                            leading: GestureDetector(
-                              onTap: () {
-                                Navigator.pushReplacement(
-                                    context,
-                                    PageTransition(
-                                        child: AltProfile(
-                                          userUid: document['user_uid'],
-                                        ),
-                                        type: PageTransitionType.bottomToTop));
-                              },
-                              child: CircleAvatar(
-                                backgroundImage:
-                                    NetworkImage(document['user_image']),
+              Expanded(
+                child: Container(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('posts')
+                        .doc(postId)
+                        .collection('likes')
+                        .snapshots(),
+                    builder: (context, AsyncSnapshot snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else {
+                        return ListView(
+                          children:
+                              snapshot.data.docs.map<Widget>((DocumentSnapshot document) {
+                            return ListTile(
+                              leading: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      PageTransition(
+                                          child: AltProfile(
+                                            userUid: document['user_uid'],
+                                          ),
+                                          type: PageTransitionType.bottomToTop));
+                                },
+                                child: CircleAvatar(
+                                  backgroundImage:
+                                      NetworkImage(document['user_image']),
+                                ),
                               ),
-                            ),
-                            title: Text(
-                              document['user_name'],
-                              style: TextStyle(
-                                  color: constantColors.blueColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                            ),
-                            subtitle: Text(
-                              document['user_email'],
-                              style: TextStyle(
-                                  color: constantColors.whiteColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12),
-                            ),
-                            trailing: Provider.of<Authentication>(context,
-                                            listen: false)
-                                        .getUserUid ==
-                                    document['user_uid']
-                                ? Container(
-                                    width: 0,
-                                    height: 0,
-                                  )
-                                : MaterialButton(
-                                    onPressed: () {},
+                              title: Text(
+                                document['user_name'],
+                                style: TextStyle(
                                     color: constantColors.blueColor,
-                                    child: Text(
-                                      'Follow',
-                                      style: TextStyle(
-                                          color: constantColors.whiteColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16),
+                              ),
+                              subtitle: Text(
+                                document['user_email'],
+                                style: TextStyle(
+                                    color: constantColors.whiteColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12),
+                              ),
+                              trailing: Provider.of<Authentication>(context,
+                                              listen: false)
+                                          .getUserUid ==
+                                      document['user_uid']
+                                  ? Container(
+                                      width: 0,
+                                      height: 0,
+                                    )
+                                  : MaterialButton(
+                                      onPressed: () {},
+                                      color: constantColors.blueColor,
+                                      child: Text(
+                                        'Follow',
+                                        style: TextStyle(
+                                            color: constantColors.whiteColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14),
+                                      ),
                                     ),
-                                  ),
-                          );
-                        }).toList(),
-                      );
-                    }
-                  },
+                            );
+                          }).toList(),
+                        );
+                      }
+                    },
+                  ),
                 ),
               )
             ],

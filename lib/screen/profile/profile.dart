@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/landing_page/landingPage.dart';
 import 'package:sm/screen/profile/profileHelper.dart';
-import 'package:sm/screen/theme_mode/theme.dart';
 import 'package:sm/service/authentication.dart';
+
+import '../../utils/theme_mode/theme.dart';
 
 class Profile extends StatelessWidget {
   Profile({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Provider.of<ThemeColor>(context, listen: false).valueTheme ? constantColors.whiteColor: constantColors.darkColor,
+      //backgroundColor: Provider.of<ThemeColor>(context, listen: false).valueTheme ? constantColors.whiteColor: constantColors.darkColor,
       appBar: AppBar(
         centerTitle: true,
         leading: IconButton(

@@ -9,6 +9,8 @@ import 'package:sm/screen/home_page/homePage.dart';
 import 'package:sm/screen/landing_page/landingUtils.dart';
 import 'package:sm/service/authentication.dart';
 import 'package:sm/service/firebaseOperation.dart';
+import 'package:sm/service/user_db_service/user_db.dart';
+import 'package:sm/utils/exceptions/server_exception.dart';
 import 'package:sm/widget/textFieldClass.dart';
 
 class LandingService with ChangeNotifier {
@@ -87,82 +89,89 @@ class LandingService with ChangeNotifier {
         });
   }
 
-  passwordLessSigIn(BuildContext context) {
+  getLastUsersSigIn(
+    BuildContext context,
+  ) {
+    return StreamBuilder<QuerySnapshot>(
+        stream: UserDB().getUsers(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasData) {
+            return passwordLessSigIn(context, snapshot);
+          } else {
+            return ServerException();
+          }
+        });
+  }
+
+  passwordLessSigIn(
+      BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+    Size size = MediaQuery.of(context).size;
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.4,
-      width: MediaQuery.of(context).size.width,
-      child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('users').snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            } else {
-              return ListView(
-                children: snapshot.data!.docs.map((DocumentSnapshot document) {
-                  return ListTile(
-                    trailing: Container(
-                      //color: constantColors.redColor,
-                      width: 120, height: 50,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              Provider.of<Authentication>(context,
-                                      listen: false)
-                                  .logIntoAccount(
-                                      document['user_email'], document['user_password'])
-                                  .whenComplete(() {
-                                Navigator.pushReplacement(
-                                    context,
-                                    PageTransition(
-                                        child: HomePage(),
-                                        type: PageTransitionType.leftToRight));
-                              });
-                            },
-                            icon: Icon(FontAwesomeIcons.check),
-                            color: constantColors.blueColor,
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              Provider.of<FirebaseOperation>(context,
-                                      listen: false)
-                                  .deleteUserData(
-                                      document['user_uid'], 'users');
-                            },
-                            icon: Icon(FontAwesomeIcons.trashAlt),
-                            color: constantColors.redColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                    leading: CircleAvatar(
-                      backgroundColor: constantColors.darkColor,
-                      backgroundImage: NetworkImage(document['user_image']),
-                    ),
-                    subtitle: Text(
-                      document['user_email'],
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: constantColors.greenColor,
-                        fontSize: 12,
-                      ),
-                    ),
-                    title: Text(
-                      document['user_name'],
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: constantColors.greenColor,
-                        fontSize: 12,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              );
-            }
-          }),
+      height: size.height * 0.4,
+      width: size.width,
+      child: ListView(
+        children: snapshot.data!.docs.map((DocumentSnapshot document) {
+          return ListTile(
+            trailing: Container(
+              //color: constantColors.redColor,
+              width: 120, height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Provider.of<Authentication>(context, listen: false)
+                          .logIntoAccount(
+                              document['user_email'], document['user_password'])
+                          .whenComplete(() {
+                        Navigator.pushReplacement(
+                            context,
+                            PageTransition(
+                                child: HomePage(),
+                                type: PageTransitionType.leftToRight));
+                      });
+                    },
+                    icon: Icon(FontAwesomeIcons.check),
+                    color: constantColors.blueColor,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Provider.of<FirebaseOperation>(context, listen: false)
+                          .deleteUserData(document['user_uid'], 'users');
+                    },
+                    icon: Icon(FontAwesomeIcons.trashAlt),
+                    color: constantColors.redColor,
+                  ),
+                ],
+              ),
+            ),
+            leading: CircleAvatar(
+              backgroundColor: constantColors.darkColor,
+              backgroundImage: NetworkImage(document['user_image']),
+            ),
+            subtitle: Text(
+              document['user_email'],
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: constantColors.greenColor,
+                fontSize: 12,
+              ),
+            ),
+            title: Text(
+              document['user_name'],
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: constantColors.greenColor,
+                fontSize: 12,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -304,9 +313,9 @@ class LandingService with ChangeNotifier {
                                       listen: false)
                                   .getUserAvatarUrl,
                             });
-                          })
-                              .whenComplete(() {
-                            print('ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg');
+                          }).whenComplete(() {
+                            print(
+                                'ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg');
                             Navigator.pushReplacement(
                                 context,
                                 PageTransition(
