@@ -100,9 +100,9 @@ class ProfileHelper with ChangeNotifier {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
+                  padding: const EdgeInsets.only(right: 10.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
                         decoration: BoxDecoration(
@@ -213,12 +213,31 @@ class ProfileHelper with ChangeNotifier {
                     width: 80,
                     child: Column(
                       children: [
-                        Text(
-                          '0',
-                          style: TextStyle(
-                              color: constantColors.whiteColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 28),
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(snapshot.data!['user_uid'])
+                              .collection('posts')
+                              .snapshots(),
+                          builder: (context, AsyncSnapshot snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            } else {
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Text(
+                                  snapshot.data.docs.length.toString(),
+                                  style: TextStyle(
+                                      color: constantColors.whiteColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 28),
+                                ),
+                              );
+                            }
+                          },
                         ),
                         Text(
                           'Posts',
@@ -300,7 +319,7 @@ class ProfileHelper with ChangeNotifier {
                           .map<Widget>((DocumentSnapshot document) {
                         return GestureDetector(
                           onTap:(){
-                            storyWidget.previewAllHighlights(context, document['title']);
+                            storyWidget.previewAllHighlights(context, document['cover']);
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -312,16 +331,16 @@ class ProfileHelper with ChangeNotifier {
                                   CircleAvatar(
                                     backgroundColor:constantColors.darkColor,
                                     backgroundImage:
-                                        NetworkImage(document['cover']),
+                                        NetworkImage(document['cover'],),
                                     radius: 20,
                                   ),
-                                  Text(
+                                  /*Text(
                                     document['title'],
                                     style: TextStyle(
                                         color: constantColors.greenColor,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12),
-                                  )
+                                  )*/
                                 ],
                               ),
                             ),
@@ -484,7 +503,7 @@ class ProfileHelper with ChangeNotifier {
                 } else {
                   return ListView(
                     children:
-                        snapshot.data.docs.map((DocumentSnapshot document) {
+                        snapshot.data.docs.map<Widget>((DocumentSnapshot document) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(
                           child: CircularProgressIndicator(),

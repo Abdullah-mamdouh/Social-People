@@ -6,7 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/chat_room/single_chat/SingleChatroom.dart';
 import 'package:sm/screen/messaging/single/singleChatMessageHelper.dart';
-import 'package:sm/screen/theme_mode/theme.dart';
+
+import '../../../utils/theme_mode/theme.dart';
 
 class SingleMessage extends StatefulWidget {
   SingleMessage(
@@ -74,9 +75,9 @@ class _SingleMessageState extends State<SingleMessage> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          color: Provider.of<ThemeColor>(context, listen: false).valueTheme
-              ? constantColors.whiteColor
-              : constantColors.darkColor,
+          // color: Provider.of<ThemeColor>(context, listen: false).valueTheme
+          //     ? constantColors.whiteColor
+          //     : constantColors.darkColor,
           child: Column(
             children: [
               AnimatedContainer(

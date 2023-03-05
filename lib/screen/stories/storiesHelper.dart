@@ -62,31 +62,33 @@ class StoriesHepher with ChangeNotifier {
     notifyListeners();
   }
 
-  Future addStoryToNewAlbum(BuildContext context, String userUid,
-      String highlightName, String storyImage) async {
+  Future saveToHighLights(BuildContext context, String userUid,
+      //String highlightName,
+      String storyImage) async {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(userUid)
         .collection('highlights')
-        .doc(highlightName)
+        .doc()
         .set({
-      'title': highlightName,
-      'cover': storyHighlightIcon,
-    }).whenComplete(() {
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(userUid)
-          .collection('highlights')
-          .doc(highlightName)
-          .collection('stories')
-          .add({
-        'image': getstoryImageUrl,
-        'user_name':
-            Provider.of<FirebaseOperation>(context, listen: false).getUserName,
-        'user_image':
-            Provider.of<FirebaseOperation>(context, listen: false).getUserImage,
-      });
+      //'title': highlightName,
+      'cover': storyImage,
     });
+    //     .whenComplete(() {
+    //   FirebaseFirestore.instance
+    //       .collection('users')
+    //       .doc(userUid)
+    //       .collection('highlights')
+    //       .doc(highlightName)
+    //       .collection('stories')
+    //       .add({
+    //     'image': getstoryImageUrl,
+    //     'user_name':
+    //         Provider.of<FirebaseOperation>(context, listen: false).getUserName,
+    //     'user_image':
+    //         Provider.of<FirebaseOperation>(context, listen: false).getUserImage,
+    //   });
+    // });
   }
 
   Future addStoryToExistingAlbum(BuildContext context, String userUid,

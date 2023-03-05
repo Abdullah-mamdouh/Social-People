@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/chat_room/group_chat/chatRoomHelper.dart';
 import 'package:sm/screen/search/groups_searching.dart';
-import 'package:sm/screen/theme_mode/theme.dart';
 
 class ChatRoom extends StatelessWidget {
   ChatRoom({Key? key}) : super(key: key);

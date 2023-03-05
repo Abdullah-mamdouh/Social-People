@@ -89,7 +89,7 @@ class _SingleChatroomState extends State<SingleChatroom> {
                                     size: 30,
                                   ),
                                   onPressed: () {
-                                    Navigator.pushReplacement(
+                                    Navigator.push(
                                         context,
                                         PageTransition(
                                             child: ChatRoom(),

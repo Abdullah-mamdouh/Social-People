@@ -5,10 +5,11 @@ import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/chat_room/group_chat/chatRoom.dart';
 import 'package:sm/screen/chat_room/single_chat/SingleChatroom.dart';
 import 'package:sm/screen/feed/feed.dart';
+import 'package:sm/screen/notification_page/notification_page.dart';
 import 'package:sm/screen/profile/profile.dart';
-import 'package:sm/screen/theme_mode/theme.dart';
 import 'package:sm/service/firebaseOperation.dart';
 
+import '../../utils/theme_mode/theme.dart';
 import 'homePageHelper.dart';
 
 class HomePage extends StatefulWidget {
@@ -27,14 +28,18 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     Provider.of<FirebaseOperation>(context, listen: false)
         .initUserDate(context);
-    print(Provider.of<FirebaseOperation>(context, listen: false).getUserImage + "asssssssssssssssaa");
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    // print(Provider.of<FirebaseOperation>(context).getUserImage +
+    //     "asssssssssssssssaa");
     return Scaffold(
-        backgroundColor: Provider.of<ThemeColor>(context, listen: false).valueTheme ? constantColors.whiteColor: constantColors.darkColor,
+        // backgroundColor:
+        //     Provider.of<ThemeColor>(context, listen: false).valueTheme
+        //         ? constantColors.whiteColor
+        //         : constantColors.darkColor,
         //constantColors.darkColor,
         //appBar: AppBar(),
         body: PageView(
@@ -43,6 +48,7 @@ class _HomePageState extends State<HomePage> {
             Feed(),
             //ChatRoom(),
             SingleChatroom(),
+            NotificationPage(),
             Profile(),
           ],
           physics: NeverScrollableScrollPhysics(),
@@ -53,6 +59,6 @@ class _HomePageState extends State<HomePage> {
           },
         ),
         bottomNavigationBar: Provider.of<HomePageHelper>(context, listen: false)
-            .bottomNavBar(context,pageIndex, pageController));
+            .bottomNavBar(context, pageIndex, pageController));
   }
 }

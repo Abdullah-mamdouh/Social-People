@@ -27,12 +27,13 @@ class HomePageHelper with ChangeNotifier {
       items: [
         CustomNavigationBarItem(icon: Icon(EvaIcons.home)),
         CustomNavigationBarItem(icon: Icon(Icons.message_rounded)),
+        CustomNavigationBarItem(icon: Icon(Icons.notifications_none_outlined)),
         CustomNavigationBarItem(
             icon: CircleAvatar(
           radius: 35,
           backgroundColor: constantColors.blueGreyColor,
           backgroundImage: NetworkImage(
-              Provider.of<FirebaseOperation>(context, listen: false)
+              Provider.of<FirebaseOperation>(context)
                   .getUserImage),
         )
         )
