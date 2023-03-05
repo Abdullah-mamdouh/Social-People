@@ -5,6 +5,7 @@ import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/alt_profile/altProfile.dart';
+import 'package:sm/screen/notification_page/notiication_helper.dart';
 import 'package:sm/service/authentication.dart';
 import 'package:sm/service/firebaseOperation.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -185,7 +186,7 @@ class PostFunction with ChangeNotifier {
     );
   }
 
-  Future addLike(BuildContext context, String postId, String subDocId) async {
+  Future addLike(BuildContext context, String postId, String subDocId, String postUserID) async {
     return FirebaseFirestore.instance
         .collection('posts')
         .doc(postId)
@@ -202,6 +203,9 @@ class PostFunction with ChangeNotifier {
       'user_email':
           Provider.of<FirebaseOperation>(context, listen: false).getUserEmail,
       'time': Timestamp.now(),
+    }).whenComplete((){
+      Provider.of<NotificationHelper>(context,listen: false).addNotification(context, postUserID, 'add Like');
+
     });
   }
 
@@ -555,6 +559,7 @@ class PostFunction with ChangeNotifier {
                             addComment(context, snapshot['caption'],
                                     commentController.text)
                                 .whenComplete(() {
+                                  Provider.of<NotificationHelper>(context,listen: false).addNotification(context, snapshot['user_uid'], 'add Comment');
                               commentController.clear();
                               notifyListeners();
                             });

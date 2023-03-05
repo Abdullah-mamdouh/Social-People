@@ -313,7 +313,7 @@ class FeedHelper with ChangeNotifier {
                                         document['caption'],
                                         Provider.of<Authentication>(context,
                                                 listen: false)
-                                            .getUserUid);
+                                            .getUserUid, document['user_uid']);
                               },
                               child: Icon(
                                 FontAwesomeIcons.heart,

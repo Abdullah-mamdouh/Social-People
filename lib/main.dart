@@ -13,6 +13,7 @@ import 'package:sm/screen/landing_page/landingService.dart';
 import 'package:sm/screen/landing_page/landingUtils.dart';
 import 'package:sm/screen/messaging/group/groupMessageHelper.dart';
 import 'package:sm/screen/messaging/single/singleChatMessageHelper.dart';
+import 'package:sm/screen/notification_page/notiication_helper.dart';
 import 'package:sm/screen/profile/profileHelper.dart';
 import 'package:sm/screen/splash_screen/splashScreen.dart';
 import 'package:sm/screen/stories/storiesHelper.dart';
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
     }
       ),
       providers: [
+        ChangeNotifierProvider(create: (_) => NotificationHelper()),
         ChangeNotifierProvider(create: (_) => SingleChatsHelper()),
         ChangeNotifierProvider(create: (_) => SingleChatMessageHelper()),
         ChangeNotifierProvider(create: (_) => GroupMessageHelper()),

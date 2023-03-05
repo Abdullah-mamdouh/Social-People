@@ -396,6 +396,7 @@ class StoryWidget {
   showViewers(BuildContext context, String storyId, String personId) {
     return showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
         return Container(
           child: Column(
@@ -408,7 +409,7 @@ class StoryWidget {
                 ),
               ),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.5,
+                height: MediaQuery.of(context).size.height * 0.45,
                 width: MediaQuery.of(context).size.width,
                 child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
@@ -424,7 +425,7 @@ class StoryWidget {
                       } else {
                         return ListView(
                           children: snapshot.data.docs
-                              .map((DocumentSnapshot document) {
+                              .map<Widget>((DocumentSnapshot document) {
                             Provider.of<StoriesHepher>(context, listen: false)
                                 .storyTimePosted(document['time']);
                             return ListTile(
@@ -478,7 +479,10 @@ class StoryWidget {
           width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
               color: constantColors.darkColor,
-              borderRadius: BorderRadius.circular(12.0)),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12.0),
+                topRight: Radius.circular(12.0),
+              ),),
         );
       },
     );

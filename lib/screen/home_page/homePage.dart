@@ -5,6 +5,7 @@ import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/chat_room/group_chat/chatRoom.dart';
 import 'package:sm/screen/chat_room/single_chat/SingleChatroom.dart';
 import 'package:sm/screen/feed/feed.dart';
+import 'package:sm/screen/notification_page/notification_page.dart';
 import 'package:sm/screen/profile/profile.dart';
 import 'package:sm/service/firebaseOperation.dart';
 
@@ -47,6 +48,7 @@ class _HomePageState extends State<HomePage> {
             Feed(),
             //ChatRoom(),
             SingleChatroom(),
+            NotificationPage(),
             Profile(),
           ],
           physics: NeverScrollableScrollPhysics(),
