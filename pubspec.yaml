@@ -49,6 +49,15 @@ dependencies:
   timeago: ^3.1.0
   circular_countdown_timer: ^0.2.0
   uuid: ^3.0.5
+  agora_rtc_engine: ^4.2.2
+  agora_rtm: ^1.5.0
+  wakelock:
+  sliding_up_panel:
+  cached_network_image:
+  permission_handler:
+  gradient_text:
+  flare_flutter:
+  random_color:
 
 dev_dependencies:
   flutter_test:
