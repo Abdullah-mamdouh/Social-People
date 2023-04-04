@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/alt_profile/altProfile.dart';
@@ -11,6 +12,11 @@ import 'package:sm/screen/stories/stories.dart';
 import 'package:sm/service/authentication.dart';
 import 'package:sm/utils/postOption.dart';
 import 'package:sm/utils/uploadPost.dart';
+import 'package:intl/intl.dart';
+import '../../service/firebaseOperation.dart';
+import '../live_streaming/agora/host.dart';
+import '../live_streaming/agora/join.dart';
+import '../live_streaming/home.dart';
 
 class FeedHelper with ChangeNotifier {
   ConstantColors constantColors = new ConstantColors();
@@ -21,6 +27,11 @@ class FeedHelper with ChangeNotifier {
       centerTitle: true,
       actions: [
         IconButton(
+          onPressed: () {
+            onCreate(context);
+          },
+          icon: Image.asset('asstes/icons/live.png',fit: BoxFit.cover),),
+        IconButton(
             onPressed: () {
               Provider.of<UploadPost>(context, listen: false)
                   .selectPostImageType(context);
@@ -29,6 +40,7 @@ class FeedHelper with ChangeNotifier {
               Icons.camera_enhance_rounded,
               color: constantColors.greenColor,
             )),
+
       ],
       title: RichText(
         text: TextSpan(
@@ -60,54 +72,68 @@ class FeedHelper with ChangeNotifier {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Container(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('stories')
-                    .snapshots(),
-                builder: (context, AsyncSnapshot snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else {
-                    return ListView(
-                      scrollDirection: Axis.horizontal,
-                      children:
-                          snapshot.data.docs.map<Widget>((DocumentSnapshot document) {
-                        return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  PageTransition(
-                                      child: Stories(documentSnapshot: document,),
-                                      type: PageTransitionType.leftToRight));
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(2.0),
-                              child: Container(
-                                height: 30,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(image: NetworkImage(document['user_image']),fit: BoxFit.cover),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                        color: constantColors.blueColor,
-                                        width: 2),
-                                ),
-                              ),
-                            ));
-                      }).toList(),
-                    );
-                  }
-                },
-              ),
-              width: size.width,
-              height: size.height * 0.06,
-              decoration: BoxDecoration(
-                color: constantColors.darkColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
+            child: Row(
+              children: [
+                IconButton(
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(),));
+                    },
+                    icon: Icon(
+                      Icons.view_stream_outlined,
+                      color: constantColors.greenColor,
+                    )),
+                Expanded(
+                  child: Container(
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('stories')
+                          .snapshots(),
+                      builder: (context, AsyncSnapshot snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else {
+                          return ListView(
+                            scrollDirection: Axis.horizontal,
+                            children:
+                                snapshot.data.docs.map<Widget>((DocumentSnapshot document) {
+                              return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        PageTransition(
+                                            child: Stories(documentSnapshot: document,),
+                                            type: PageTransitionType.leftToRight));
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(2.0),
+                                    child: Container(
+                                      height: 30,
+                                      width: 50,
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(image: NetworkImage(document['user_image']),fit: BoxFit.cover),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: constantColors.blueColor,
+                                              width: 2),
+                                      ),
+                                    ),
+                                  ));
+                            }).toList(),
+                          );
+                        }
+                      },
+                    ),
+                    width: size.width,
+                    height: size.height * 0.06,
+                    decoration: BoxDecoration(
+                      color: constantColors.darkColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -484,5 +510,33 @@ class FeedHelper with ChangeNotifier {
         );
       }).toList(),
     );
+  }
+
+  Future<void> onCreate(BuildContext context) async {
+    // await for camera and mic permissions before pushing video page
+    await _handleCameraAndMic();
+    var date = DateTime.now();
+    var currentTime = '${DateFormat("dd-MM-yyyy hh:mm:ss").format(date)}';
+    // push video page with given channel name
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CallPage(
+          channelName: Provider.of<FirebaseOperation>(context)
+              .getUserName,
+          time: currentTime ,
+          image: Provider.of<FirebaseOperation>(context)
+              .getUserImage,
+        ),
+      ),
+    );
+
+  }
+
+  Future<void> _handleCameraAndMic() async {
+    await [Permission.microphone, Permission.camera].request();
+    // await PermissionHandler().requestPermissions(
+    //   [PermissionGroup.camera, PermissionGroup.microphone],
+    // );
   }
 }
