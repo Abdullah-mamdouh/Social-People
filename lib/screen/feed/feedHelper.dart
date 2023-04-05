@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/alt_profile/altProfile.dart';
+import 'package:sm/screen/live_streaming/utils/setting.dart';
 import 'package:sm/screen/stories/stories.dart';
 import 'package:sm/service/authentication.dart';
 import 'package:sm/utils/postOption.dart';
@@ -74,14 +75,66 @@ class FeedHelper with ChangeNotifier {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                IconButton(
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(),));
-                    },
-                    icon: Icon(
-                      Icons.view_stream_outlined,
-                      color: constantColors.greenColor,
-                    )),
+                Container(
+                    height: 70,
+                    width: 70,
+                    child: GestureDetector(
+                      onTap: (){
+                      },
+                      child: Stack(
+                        alignment: Alignment(0, 0),
+                        children: <Widget>[
+                          Container(
+                            height: 60,
+                            width: 60,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                      colors: [
+                                        Colors.indigo,
+                                        Colors.blue,
+                                        Colors.cyan
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight
+                                  )
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 55.5,
+                            width: 55.5,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.black,
+                            ),
+                          ),
+                          Container(
+                              height: 55,
+                              width: 55,
+                              alignment: Alignment.bottomRight,
+                              child: Container(
+                                decoration: new BoxDecoration(
+                                  color: Colors.blue,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.black,
+                                    width: 1,
+                                  ),
+                                ),
+
+                                child: Icon(
+                                  Icons.add,
+                                  size: 13.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                          )
+
+                        ],
+                      ),
+                    )
+                ),
                 Expanded(
                   child: Container(
                     child: StreamBuilder<QuerySnapshot>(
@@ -296,22 +349,33 @@ class FeedHelper with ChangeNotifier {
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.4,
-                    width: MediaQuery.of(context).size.width,
-                    /*child: FittedBox(
-                      child: Image.network(
-                        document['post_image'],fit: BoxFit.cover,
-                        //scale: 15,
+                GestureDetector(
+                  onTap: (){
+                    if(document['caption'] == 'Live'){
+                      print('ghbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbj');
+                      onJoin(context,channelName: document['user_name'],channelId: APP_ID,
+                          hostImage: document['user_image'],userImage: Provider.of<FirebaseOperation>(context,listen: false)
+                              .getUserImage,username: Provider.of<FirebaseOperation>(context,listen: false)
+                              .getUserName);
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.4,
+                      width: MediaQuery.of(context).size.width,
+                      /*child: FittedBox(
+                        child: Image.network(
+                          document['post_image'],fit: BoxFit.cover,
+                          //scale: 15,
+                        ),
+                      ),*/
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage( document['post_image'],),
+                          fit: BoxFit.fill,
+                        )
                       ),
-                    ),*/
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage( document['post_image'],),
-                        fit: BoxFit.fill,
-                      )
                     ),
                   ),
                 ),
@@ -533,6 +597,24 @@ class FeedHelper with ChangeNotifier {
 
   }
 
+  Future<void> onJoin(BuildContext context,{channelName,channelId, username, hostImage, userImage}) async {
+    // update input validation
+    if (channelName.isNotEmpty) {
+      // push video page with given channel name
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => JoinPage(
+            channelName: channelName,
+            channelId: channelId,
+            username: username,
+            hostImage: hostImage,
+            userImage: userImage,
+          ),
+        ),
+      );
+    }
+  }
   Future<void> _handleCameraAndMic() async {
     await [Permission.microphone, Permission.camera].request();
     // await PermissionHandler().requestPermissions(
