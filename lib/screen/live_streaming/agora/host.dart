@@ -91,7 +91,7 @@ class _CallPageState extends State<CallPage>{
         .uploadPostData(widget.channelName, {
       'post_image': 'https://firebasestorage.googleapis.com/v0/b/social-9064f.appspot.com/o/posts%2Fdata%2Fuser%2F0%2'
           'Fcom.example.sm%2Fcache%2Fvideo_live.png?alt=media&token=2ae211f6-1ef3-400c-b2c9-097569ec0660',
-      'caption': widget.channelName,
+      'caption':'Live',
       'user_name':
       Provider.of<FirebaseOperation>(context, listen: false)
           .getUserName,

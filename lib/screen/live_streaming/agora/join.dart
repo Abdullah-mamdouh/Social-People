@@ -17,7 +17,7 @@ import '../utils/setting.dart';
 class JoinPage extends StatefulWidget {
   /// non-modifiable channel name of the page
   final String channelName;
-  final int channelId;
+  final String channelId;
   final String username;
   final String hostImage;
   final String userImage;
@@ -89,12 +89,13 @@ class _JoinPageState extends State<JoinPage> {
     await _engine.enableWebSdkInteroperability(true);
     await _engine.setParameters(
         '''{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}''');
-    await _engine.joinChannel(null, widget.channelName, null, 0);
+    await _engine.joinChannel(APP_ID, widget.channelName, null, 0);
   }
 
   /// Create agora sdk instance and initialize
   Future<void> _initAgoraRtcEngine() async {
-    _engine = await RtcEngine.createWithConfig(RtcEngineConfig(APP_ID));
+    //_engine = await RtcEngine.createWithConfig(RtcEngineConfig(APP_ID));
+    _engine = await RtcEngine.create(APP_ID);
     await _engine.enableVideo();
     await _engine.muteLocalAudioStream(true);
     await _engine.enableLocalAudio(false);
@@ -167,7 +168,21 @@ class _JoinPageState extends State<JoinPage> {
     final List<StatefulWidget> list = [];
     list.add(RtcLocalView.SurfaceView());
     _users.forEach((int uid) => list.add(RtcRemoteView.SurfaceView(uid: uid)));
+    if(accepted == true){
+      list.add(RtcLocalView.SurfaceView());
 
+    }
+    if(list.isEmpty) {
+
+      setState(() {
+        loading=true;
+      });
+    }
+    else{
+      setState(() {
+        loading=false;
+      });
+    }
 
     return list;
     // final List<AgoraRenderWidget>  list = [];
@@ -217,21 +232,25 @@ class _JoinPageState extends State<JoinPage> {
   /// Video layout wrapper
   Widget _viewRows() {
     final views = _getRenderViews();
-
+    print(views.length);
     switch (views.length) {
       case 1:
-        return (loading==true)&&(completed==false)?
+        return
+          (loading==true)&&(completed==false)?
         //LoadingPage()
         LoadingPage()
-            :Container(
+            :
+          Container(
             child: Column(
               children: <Widget>[_videoView(views[0])],
             ));
       case 2:
-        return (loading==true)&&(completed==false)?
+        return
+          (loading==true)&&(completed==false)?
         //LoadingPage()
         LoadingPage()
-            :Container(
+            :
+        Container(
             child: Column(
               children: <Widget>[
                 _expandedVideoRow([views[0]]),
@@ -318,7 +337,8 @@ class _JoinPageState extends State<JoinPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       CachedNetworkImage(
-                        imageUrl: _infoStrings[index].image,
+                        imageUrl: 'https://firebasestorage.googleapis.com/v0/b/social-9064f.appspot.com/o/posts%2Fdata%2Fuser%2F0%2'
+                            'Fcom.example.sm%2Fcache%2Fvideo_live.png?alt=media&token=2ae211f6-1ef3-400c-b2c9-097569ec0660',//_infoStrings[index].image,
                         imageBuilder: (context, imageProvider) => Container(
                           width: 32.0,
                           height: 32.0,
