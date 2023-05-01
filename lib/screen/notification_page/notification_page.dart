@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sm/screen/notification_page/widgets/notification_widget.dart';
 
 class NotificationPage extends StatefulWidget {
-  const NotificationPage({Key? key}) : super(key: key);
-
+  NotificationPage({Key? key,}) : super(key: key);
   @override
   State<NotificationPage> createState() => _NotificationPageState();
 }

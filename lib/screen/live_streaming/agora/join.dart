@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:agora_rtc_engine/rtc_channel.dart';
+import 'package:http/http.dart' as http;
 import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:agora_rtm/agora_rtm.dart';
 import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
@@ -6,6 +9,8 @@ import 'package:agora_rtc_engine/rtc_remote_view.dart' as RtcRemoteView;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:sm/service/firebaseOperation.dart';
 import 'package:wakelock/wakelock.dart';
 import 'dart:math' as math;
 import '../HearAnim.dart';
@@ -18,6 +23,7 @@ class JoinPage extends StatefulWidget {
   /// non-modifiable channel name of the page
   final String channelName;
   final String channelId;
+  final String token;
   final String username;
   final String hostImage;
   final String userImage;
@@ -25,7 +31,9 @@ class JoinPage extends StatefulWidget {
 
 
   /// Creates a call page with given channel name.
-  const JoinPage({Key? key, required this.channelName, required this.channelId, required this.username,required this.hostImage,required this.userImage}) : super(key: key);
+  const JoinPage({Key? key, required this.channelName, required this.channelId,
+    required this.token, required this.username,
+    required this.hostImage,required this.userImage}) : super(key: key);
 
 
   @override
@@ -52,7 +60,9 @@ class _JoinPageState extends State<JoinPage> {
   AgoraRtmClient? _client;
   AgoraRtmChannel? _channel;
   late RtcEngine _engine;
-
+  late RtcChannel channel;
+  ChannelMediaOptions? options;
+  String baseUrl = 'https://agora-token-service-production-76e6.up.railway.app'; //Add the link to your deployed server here
   //Love animation
   final _random = math.Random();
   Timer? _timer;
@@ -80,27 +90,34 @@ class _JoinPageState extends State<JoinPage> {
     userMap = {widget.username: widget.userImage};
     _createClient();
   }
-
   Future<void> initialize() async {
 
 
     await _initAgoraRtcEngine();
     _addAgoraEventHandlers();
-    await _engine.enableWebSdkInteroperability(true);
-    await _engine.setParameters(
-        '''{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}''');
-    await _engine.joinChannel(APP_ID, widget.channelName, null, 0);
+    // await _engine.enableWebSdkInteroperability(true);
+    // await _engine.setParameters(
+    //     '''{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}''');
+    await _engine.joinChannel(widget.token, widget.channelName, null, 0);
   }
 
   /// Create agora sdk instance and initialize
   Future<void> _initAgoraRtcEngine() async {
+    // RtcLocalView.SurfaceView(channelId: widget.channelName);
+    // RtcRemoteView.SurfaceView(channelId: widget.channelName,uid: 0,);
     //_engine = await RtcEngine.createWithConfig(RtcEngineConfig(APP_ID));
     _engine = await RtcEngine.create(APP_ID);
     await _engine.enableVideo();
     await _engine.muteLocalAudioStream(true);
     await _engine.enableLocalAudio(false);
-    await _engine.enableLocalVideo(!muted);
-
+    await _engine.setClientRole(ClientRole.Audience);
+    //await _engine.enableLocalVideo(!muted);
+    await _engine.enableLocalVideo(true);
+    // channel = await RtcChannel.create(widget.channelName);
+    // _addRtcChannelEventHandlers();
+    //await _engine.setClientRole(ClientRole.Audience);
+    // await channel.joinChannel(token, null, 0, ChannelMediaOptions(publishLocalVideo: true, autoSubscribeVideo: true));
+    // await channel.publish();
 
   }
 
@@ -132,35 +149,47 @@ class _JoinPageState extends State<JoinPage> {
         }
         _users.remove(uid);
       },
+      tokenPrivilegeWillExpire: (token) async {
+        await _engine.renewToken(widget.token);
+      },
     );
-    // _engine.onJoinChannelSuccess = (
-    //   String channel,
-    //   int uid,
-    //   int elapsed,
-    // ) {
-    //   Wakelock.enable();
-    // };
 
-    // _engine.onUserJoined = (int uid, int elapsed) {
-    //   setState(() {
-    //     _users.add(uid);
-    //   });
-    // };
+  }
 
-    // AgoraRtcEngine.onUserOffline = (int uid, int reason) {
-    //     if(uid==widget.channelId){
-    //       setState(() {
-    //         completed=true;
-    //         Future.delayed(const Duration(milliseconds: 1500), () async{
-    //           await Wakelock.disable();
-    //           Navigator.pop(context);
-    //         });
-    //       });
-    //     }
-    //     _users.remove(uid);
-    // };
-
-
+  void _addRtcChannelEventHandlers() {
+    channel.setEventHandler(RtcChannelEventHandler(
+      error: (code) {
+        setState(() {
+          //_infoStrings.add('Rtc Channel onError: $code');
+        });
+      },
+      joinChannelSuccess: (channel, uid, elapsed) {
+        setState(() {
+          final info = 'Rtc Channel onJoinChannel: $channel, uid: $uid';
+          //_infoStrings.add(info);
+        });
+      },
+      leaveChannel: (stats) {
+        setState(() {
+          // _infoStrings.add('Rtc Channel onLeaveChannel');
+          // _users2.clear();
+        });
+      },
+      userJoined: (uid, elapsed) {
+        setState(() {
+          final info = 'Rtc Channel userJoined: $uid';
+          // _infoStrings.add(info);
+          // _users2.add(uid);
+        });
+      },
+      userOffline: (uid, reason) {
+        setState(() {
+          final info = 'Rtc Channel userOffline: $uid , reason: $reason';
+          // _infoStrings.add(info);
+          // _users2.remove(uid);
+        });
+      },
+    ));
   }
 
   /// Helper function to get list of native views
@@ -258,7 +287,7 @@ class _JoinPageState extends State<JoinPage> {
               ],
             ));
     }
-    return Container();
+    return Container(color: Colors.red,);
 
   }
 
@@ -898,7 +927,7 @@ class _JoinPageState extends State<JoinPage> {
     try {
       _channelMessageController.clear();
       await _channel!.sendMessage(AgoraRtmMessage.fromText(text));
-      _log(user: widget.channelName, info:text,type: 'message');
+      _log(user: widget.channelName, info:text,type: 'message',);
     } catch (errorCode) {
       //_log('Send channel message error: ' + errorCode.toString());
     }
@@ -906,7 +935,8 @@ class _JoinPageState extends State<JoinPage> {
 
   void _createClient() async {
     _client =
-    await AgoraRtmClient.createInstance('b42ce8d86225475c9558e478f1ed4e8e');
+    await AgoraRtmClient.createInstance(APP_ID,);
+    // _client!.login(widget.token, widget.username);
     _client!.onMessageReceived = (AgoraRtmMessage message, String peerId)  async{
       var img = 'asstes/icons/task.png';//await FireStoreClass.getImage(username: peerId);
       userMap.putIfAbsent(peerId, () => img);
@@ -962,7 +992,7 @@ class _JoinPageState extends State<JoinPage> {
     };
     channel.onMessageReceived =
         (AgoraRtmMessage message, AgoraRtmMember member) async {
-      var img = 'asstes/icons/task.png'; // await FireStoreClass.getImage(username: member.userId);
+      var img = Provider.of<FirebaseOperation>(context, listen: false).getUserImage; // await FireStoreClass.getImage(username: member.userId);
       userMap.putIfAbsent(member.userId, () => img);
       _log(user: member.userId, info: message.text, type: 'message');
     };

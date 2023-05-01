@@ -11,6 +11,7 @@ import 'package:sm/screen/home_page/homePageHelper.dart';
 import 'package:sm/screen/landing_page/landingHelper.dart';
 import 'package:sm/screen/landing_page/landingService.dart';
 import 'package:sm/screen/landing_page/landingUtils.dart';
+import 'package:sm/screen/live_streaming/agora_service/agora_service.dart';
 import 'package:sm/screen/messaging/group/groupMessageHelper.dart';
 import 'package:sm/screen/messaging/single/singleChatMessageHelper.dart';
 import 'package:sm/screen/notification_page/notiication_helper.dart';
@@ -54,6 +55,7 @@ class MyApp extends StatelessWidget {
     }
       ),
       providers: [
+        ChangeNotifierProvider(create: (_) => AgoraService()),
         ChangeNotifierProvider(create: (_) => NotificationHelper()),
         ChangeNotifierProvider(create: (_) => SingleChatsHelper()),
         ChangeNotifierProvider(create: (_) => SingleChatMessageHelper()),

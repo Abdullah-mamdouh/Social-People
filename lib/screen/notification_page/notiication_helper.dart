@@ -12,7 +12,7 @@ class NotificationHelper with ChangeNotifier {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(userUid)
-        .collection('notifiction')
+        .collection('notification')
         .doc().set({
       'time': DateTime.now(),
       'typeNotifier': type,
@@ -23,5 +23,12 @@ class NotificationHelper with ChangeNotifier {
       'user_uid': Provider.of<Authentication>(context, listen: false).getUserUid,
     }
     );
+  }
+
+  getNotifications(BuildContext context, String userUid){
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(userUid)
+        .collection('notification').orderBy('time', descending: true).snapshots();
   }
 }

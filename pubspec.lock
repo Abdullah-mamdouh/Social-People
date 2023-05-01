@@ -562,13 +562,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1+1"
-  random_color:
-    dependency: "direct main"
-    description:
-      name: random_color
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.5"
   rxdart:
     dependency: transitive
     description:
