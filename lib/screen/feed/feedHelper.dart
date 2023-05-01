@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/alt_profile/altProfile.dart';
+import 'package:sm/screen/live_streaming/agora_service/agora_service.dart';
 import 'package:sm/screen/live_streaming/utils/setting.dart';
 import 'package:sm/screen/stories/stories.dart';
 import 'package:sm/service/authentication.dart';
@@ -17,7 +18,6 @@ import 'package:intl/intl.dart';
 import '../../service/firebaseOperation.dart';
 import '../live_streaming/agora/host.dart';
 import '../live_streaming/agora/join.dart';
-import '../live_streaming/home.dart';
 
 class FeedHelper with ChangeNotifier {
   ConstantColors constantColors = new ConstantColors();
@@ -29,11 +29,13 @@ class FeedHelper with ChangeNotifier {
       actions: [
         IconButton(
           onPressed: () {
-            onCreate(context);
+            Provider.of<AgoraService>(context, listen: false).
+            getToken(Provider.of<FirebaseOperation>(context,listen: false).getUserName,).whenComplete(() =>  onCreate(context));
           },
           icon: Image.asset('asstes/icons/live.png',fit: BoxFit.cover),),
         IconButton(
             onPressed: () {
+
               Provider.of<UploadPost>(context, listen: false)
                   .selectPostImageType(context);
             },
@@ -352,8 +354,8 @@ class FeedHelper with ChangeNotifier {
                 GestureDetector(
                   onTap: (){
                     if(document['caption'] == 'Live'){
-                      print('ghbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbj');
-                      onJoin(context,channelName: document['user_name'],channelId: APP_ID,
+                      //print('ghbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbj');
+                      onJoin(context,channelName: document['user_name'],channelId: APP_ID,token: document['token'],
                           hostImage: document['user_image'],userImage: Provider.of<FirebaseOperation>(context,listen: false)
                               .getUserImage,username: Provider.of<FirebaseOperation>(context,listen: false)
                               .getUserName);
@@ -597,7 +599,7 @@ class FeedHelper with ChangeNotifier {
 
   }
 
-  Future<void> onJoin(BuildContext context,{channelName,channelId, username, hostImage, userImage}) async {
+  Future<void> onJoin(BuildContext context,{channelName,channelId,token, username, hostImage, userImage}) async {
     // update input validation
     if (channelName.isNotEmpty) {
       // push video page with given channel name
@@ -607,6 +609,7 @@ class FeedHelper with ChangeNotifier {
           builder: (context) => JoinPage(
             channelName: channelName,
             channelId: channelId,
+            token: token,
             username: username,
             hostImage: hostImage,
             userImage: userImage,
@@ -615,6 +618,7 @@ class FeedHelper with ChangeNotifier {
       );
     }
   }
+
   Future<void> _handleCameraAndMic() async {
     await [Permission.microphone, Permission.camera].request();
     // await PermissionHandler().requestPermissions(

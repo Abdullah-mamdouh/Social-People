@@ -57,7 +57,6 @@ dependencies:
   permission_handler:
   gradient_text:
   flare_flutter:
-  random_color:
 
 dev_dependencies:
   flutter_test:

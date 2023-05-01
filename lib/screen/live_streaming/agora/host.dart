@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:agora_rtc_engine/rtc_channel.dart';
+import 'package:http/http.dart' as http;
 import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:agora_rtm/agora_rtm.dart';
 import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
@@ -11,6 +14,7 @@ import 'package:flutter/material.dart';
 //import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:sm/screen/live_streaming/agora_service/agora_service.dart';
 import 'package:wakelock/wakelock.dart';
 import 'dart:math' as math;
 
@@ -38,6 +42,9 @@ class CallPage extends StatefulWidget {
 class _CallPageState extends State<CallPage>{
   static final _users = <int>[];
   List<User> userList = [];
+  String baseUrl = 'https://agora-token-service-production-76e6.up.railway.app'; //Add the link to your deployed server here
+  int uid = 0;
+  String? token;
 
   bool _isLogin = true;
   bool _isInChannel = true;
@@ -49,11 +56,15 @@ class _CallPageState extends State<CallPage>{
 
   final _channelMessageController = TextEditingController();
 
-  final _infoStrings = <Message>[];
+  static final _infoStrings = <Message>[];
 
   late RtcEngine _engine;
+  late RtcChannel channel;
+
   AgoraRtmClient? _client;
   AgoraRtmChannel? _channel;
+
+
   bool heart = false;
   bool anyPerson = false;
 
@@ -81,6 +92,7 @@ class _CallPageState extends State<CallPage>{
     // initialize agora sdk
     initialize();
     userMap = {widget.channelName: widget.image};
+
     _createClient();
     _storeLiveInFirebase();
   }
@@ -92,6 +104,7 @@ class _CallPageState extends State<CallPage>{
       'post_image': 'https://firebasestorage.googleapis.com/v0/b/social-9064f.appspot.com/o/posts%2Fdata%2Fuser%2F0%2'
           'Fcom.example.sm%2Fcache%2Fvideo_live.png?alt=media&token=2ae211f6-1ef3-400c-b2c9-097569ec0660',
       'caption':'Live',
+      'token':  Provider.of<AgoraService>(context,listen: false).getLiveToken,
       'user_name':
       Provider.of<FirebaseOperation>(context, listen: false)
           .getUserName,
@@ -139,27 +152,37 @@ class _CallPageState extends State<CallPage>{
 
     await _initAgoraRtcEngine();
     _addAgoraEventHandlers();
-    await _engine.enableWebSdkInteroperability(true);
-    await _engine.setParameters(
-        '''{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}''');
-    await _engine.joinChannel(null, widget.channelName, null, 0);
+    // await _engine.enableLocalVideo(true);
+    // await _engine.enableVideo();
+    // await _engine.enableWebSdkInteroperability(true);
+    // await _engine.setParameters(
+    //     '''{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}''');
+    //await getToken();
+    await _engine.joinChannel(Provider.of<AgoraService>(context, listen: false).getLiveToken, widget.channelName, null, 0);
   }
 
   /// Create agora sdk instance and initialize
   Future<void> _initAgoraRtcEngine() async {
+    // RtcLocalView.SurfaceView(channelId: widget.channelName);
+    // RtcRemoteView.SurfaceView(channelId: widget.channelName,uid: 0,);
     _engine = await RtcEngine.create(APP_ID);
     //await RtcEngine.enableVideo();
     // await RtcEngine.enableLocalAudio(true);
-
+    await _engine.enableLocalVideo(true);
     //_engine = await RtcEngine.createWithConfig(RtcEngineConfig(APP_ID));
     await _engine.enableVideo();
     await _engine.enableLocalAudio(true);
-    //await _engine.setChannelProfile(ChannelProfile.LiveBroadcasting);
-    // if (widget.isBroadcaster) {
-    //   await _engine.setClientRole(ClientRole.Broadcaster);
-    // } else {
-    //   await _engine.setClientRole(ClientRole.Audience);
-    // }
+   // await _engine.setChannelProfile(ChannelProfile.LiveBroadcasting);
+   // if (widget.isBroadcaster) {
+      //await _engine.setClientRole(ClientRole.Broadcaster);
+   // } else {
+   //    await _engine.setClientRole(ClientRole.Audience);
+   //  }
+   //  channel = await RtcChannel.create(widget.channelName);
+   //  _addRtcChannelEventHandlers();
+   //  await _engine.setClientRole(ClientRole.Broadcaster);
+   //  await channel.joinChannel(token, null, 0, ChannelMediaOptions(publishLocalVideo: true, autoSubscribeVideo: true));
+   //  await channel.publish();
 
   }
 
@@ -196,6 +219,9 @@ class _CallPageState extends State<CallPage>{
           _users.remove(uid);
         });
       },
+      tokenPrivilegeWillExpire: (token) async {
+        await _engine.renewToken(token);
+      },
     );
     // AgoraRtcEngine.onLeaveChannel = () {
     //   setState(() {
@@ -205,31 +231,53 @@ class _CallPageState extends State<CallPage>{
 
   }
 
-  /// Helper function to get list of native views
-  List<Widget> _getRenderViews() {
-    final list = [
-      RtcLocalView.SurfaceView(),
-    ];
-    return list;
-   /* final List<Widget> list = [
-      // RenderWidget(0, local: true, preview: true),
-    ];
-    if(accepted==true) {
-      _users.forEach((int uid) {
-        if(uid!=0){
-          guestID = uid;
-        }
-        // list.add(RenderWidget(uid));
-      });
-    }
-    return list;*/
+  void _addRtcChannelEventHandlers() {
+    channel.setEventHandler(RtcChannelEventHandler(
+      error: (code) {
+        setState(() {
+          //_infoStrings.add('Rtc Channel onError: $code');
+        });
+      },
+      joinChannelSuccess: (channel, uid, elapsed) {
+        setState(() {
+          final info = 'Rtc Channel onJoinChannel: $channel, uid: $uid';
+          //_infoStrings.add(info);
+        });
+      },
+      leaveChannel: (stats) {
+        setState(() {
+          // _infoStrings.add('Rtc Channel onLeaveChannel');
+          // _users2.clear();
+        });
+      },
+      userJoined: (uid, elapsed) {
+        setState(() {
+          final info = 'Rtc Channel userJoined: $uid';
+          // _infoStrings.add(info);
+          // _users2.add(uid);
+        });
+      },
+      userOffline: (uid, reason) {
+        setState(() {
+          final info = 'Rtc Channel userOffline: $uid , reason: $reason';
+          // _infoStrings.add(info);
+          // _users2.remove(uid);
+        });
+      },
+    ));
   }
 
+  /// Helper function to get list of native views
+  List<Widget> _getRenderViews() {
+    final List<StatefulWidget> list = [];
+    list.add(RtcLocalView.SurfaceView());
+    _users.forEach((int uid) => list.add(RtcRemoteView.SurfaceView(uid: uid)));
+    return list;
+  }
   /// Video view wrapper
   Widget _videoView(view) {
     return Expanded(child: ClipRRect(child: view));
   }
-
 
   /// Video view row wrapper
   Widget _expandedVideoRow(List<Widget> views) {
@@ -240,8 +288,45 @@ class _CallPageState extends State<CallPage>{
       ),
     );
   }
+  /// Video layout wrapper
+  Widget _viewRows() {
+    final views = _getRenderViews();
+    switch (views.length) {
+      case 1:
+        return Container(
+            child: Column(
+              children: <Widget>[_videoView(views[0])],
+            ));
+      case 2:
+        return Container(
+            child: Column(
+              children: <Widget>[
+                _expandedVideoRow([views[0]]),
+                _expandedVideoRow([views[1]])
+              ],
+            ));
+      case 3:
+        return Container(
+            child: Column(
+              children: <Widget>[
+                _expandedVideoRow(views.sublist(0, 2)),
+                _expandedVideoRow(views.sublist(2, 3))
+              ],
+            ));
+      case 4:
+        return Container(
+            child: Column(
+              children: <Widget>[
+                _expandedVideoRow(views.sublist(0, 2)),
+                _expandedVideoRow(views.sublist(2, 4))
+              ],
+            ));
+      default:
+    }
+    return Container();
+  }
 
-
+/*
   /// Video layout wrapper
   Widget _viewRows() {
     final views = _getRenderViews();
@@ -270,7 +355,7 @@ class _CallPageState extends State<CallPage>{
         ));*/
   }
 
-
+*/
   void popUp() async{
     setState(() {
       heart=true;
@@ -318,8 +403,6 @@ class _CallPageState extends State<CallPage>{
     );
   }
 
-
-
   /// Info panel to show logs
   Widget messageList() {
     return Container(
@@ -334,7 +417,7 @@ class _CallPageState extends State<CallPage>{
             itemCount: _infoStrings.length,
             itemBuilder: (BuildContext context, int index) {
               if (_infoStrings.isEmpty) {
-
+                //return null;
               }
               return Padding(
                 padding: const EdgeInsets.symmetric(
@@ -348,7 +431,8 @@ class _CallPageState extends State<CallPage>{
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       CachedNetworkImage(
-                        imageUrl: _infoStrings[index].image,
+                        imageUrl: 'https://firebasestorage.googleapis.com/v0/b/social-9064f.appspot.com/o/posts%2Fdata%2Fuser%2F0%2'
+                            'Fcom.example.sm%2Fcache%2Fvideo_live.png?alt=media&token=2ae211f6-1ef3-400c-b2c9-097569ec0660',//_infoStrings[index].image,
                         imageBuilder: (context, imageProvider) => Container(
                           width: 32.0,
                           height: 32.0,
@@ -365,7 +449,7 @@ class _CallPageState extends State<CallPage>{
                         ),
                         child: Text(
                           '${_infoStrings[index].user} joined',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                           ),
@@ -373,8 +457,8 @@ class _CallPageState extends State<CallPage>{
                       ),
                     ],
                   ),
-                )
-                    : (_infoStrings[index].type=='message')?
+                ):
+                (_infoStrings[index].type=='message')?
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Row(
@@ -402,21 +486,21 @@ class _CallPageState extends State<CallPage>{
                             ),
                             child: Text(
                               _infoStrings[index].user,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold
                               ),
                             ),
                           ),
-                          const SizedBox(height: 5,),
+                          SizedBox(height: 5,),
                           Padding(
                             padding: const  EdgeInsets.symmetric(
                               horizontal: 8,
                             ),
                             child: Text(
                               _infoStrings[index].message,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 14
                               ),
@@ -1013,7 +1097,7 @@ class _CallPageState extends State<CallPage>{
   Future<AgoraRtmChannel> _createChannel(String name) async {
     AgoraRtmChannel? channel = await _client!.createChannel(name);
     channel!.onMemberJoined = (AgoraRtmMember member) async {
-      var img = 'asstes/icons/task.png';//await FireStoreClass.getImage(username: member.userId);
+      var img = widget.image;//await FireStoreClass.getImage(username: member.userId);
       var nm = 'ALi Ali';//await FireStoreClass.getName(username: member.userId);
       setState(() {
         userList.add(new User(username: member.userId, name: nm, image: img));
@@ -1022,7 +1106,7 @@ class _CallPageState extends State<CallPage>{
       });
       userMap.putIfAbsent(member.userId, () => img);
       var len;
-      _channel!.getMembers().then((value) {
+      channel.getMembers().then((value) {
         len = value.length;
         setState(() {
           userNo= len-1 ;
@@ -1084,7 +1168,7 @@ class _CallPageState extends State<CallPage>{
 
     }
     else {
-      var image = userMap[user];
+      var image = widget.image;//userMap[user];
       Message m = new Message(
           message: info!, type: type!, user: user!, image: image);
       setState(() {

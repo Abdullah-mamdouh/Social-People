@@ -1,7 +1,11 @@
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../constant/Constantcolors.dart';
+import '../../../service/authentication.dart';
+import '../notiication_helper.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class NotificationsWidget extends StatefulWidget {
   @override
@@ -35,6 +39,8 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
         ),
       ),
       body: Container(
+        height: double.infinity,
+        width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 10),
         child: Column(
           children: [
@@ -42,23 +48,36 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
               height: 10,
             ),
             Expanded(
-                child: ListView.separated(
-                    itemBuilder: (context, index) {
-                      return _buildNotificationWidget();
-                    },
-                    separatorBuilder: (context, index) {
-                      return SizedBox(
-                        height: 10,
-                      );
-                    },
-                    itemCount: 15))
+              child: StreamBuilder<QuerySnapshot>(
+                  stream: Provider.of<NotificationHelper>(context,
+                          listen: false)
+                      .getNotifications(
+                          context,
+                          Provider.of<Authentication>(context, listen: false)
+                              .getUserUid),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError || !snapshot.hasData) {
+                      return Container();
+                    }
+                    return Column(
+                      children: snapshot.data!.docs
+                          .map<Widget>((DocumentSnapshot document) {
+                            return _buildNotificationWidget(document);
+                      }).toList(),
+                    );
+                  }),
+            ),
           ],
         ),
       ),
     );
   }
 
-  _buildNotificationWidget() {
+  _buildNotificationWidget(var document) {
+    //debugPrint(document['user_image']);
     return Container(
       color: constantColors.darkColor,
       padding: EdgeInsets.all(10),
@@ -68,53 +87,60 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
           ClipRRect(
             borderRadius: BorderRadius.circular(90),
             child: Image(
-              image: AssetImage('asstes/images/login.png'),
+              image: NetworkImage('${document['user_image']}'),fit: BoxFit.cover,
               height: 70,
               width: 70,
             ),
           ),
           SizedBox(
-            width: 5,
+            width:8,
           ),
           Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                // mainAxisAlignment: MainAxisAlignment.center,
+                // //crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'في هذه المكان يوضع عنوان الإشعار',
-                          maxLines: 2,
-                          softWrap: true,
-                          overflow: TextOverflow.fade,
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      Text(
-                        '4:50 pm',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400),
-                      ),
-                    ],
+                  Expanded(
+                    child: Text(
+                      '${document['user_name']}',
+                      maxLines: 2,
+                      softWrap: true,
+                      overflow: TextOverflow.fade,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600),
+                    ),
                   ),
                   Text(
-                    'هذا النص هو مثال لنص يمكن أن يستبدل في نفسالمساحة، لقد تم توليد هذا النص من مولد النص العربىحيث يمكنك أن تولد مثل',
+                    '${ timeformat(document['time'])}',
                     style: TextStyle(
                         color: Colors.white,
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w400),
                   ),
                 ],
-              ))
+              ),
+              Text(
+                '${document['typeNotifier']}',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400),
+              ),
+            ],
+          ))
         ],
       ),
     );
   }
+}
+
+timeformat(dynamic timeData){
+  Timestamp time = timeData ;
+  DateTime dateTime = time.toDate();
+  return timeago.format(dateTime);
 }
