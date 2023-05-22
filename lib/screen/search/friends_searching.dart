@@ -58,7 +58,7 @@ class Friends_Searching extends SearchDelegate {
                     children: [
                       CircleAvatar(
                         backgroundImage: NetworkImage(document['user_image']),
-                        backgroundColor: constantColors.greyColor,
+                        backgroundColor: ConstantColors.greyColor,
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.01,

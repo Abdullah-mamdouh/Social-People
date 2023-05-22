@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/alt_profile/altProfileHelper.dart';
+import 'package:sm/screen/alt_profile/chat_helper.dart';
 import 'package:sm/screen/chat_room/group_chat/chatRoomHelper.dart';
 import 'package:sm/screen/chat_room/single_chat/singleChatsHelper.dart';
 import 'package:sm/screen/feed/feedHelper.dart';
@@ -56,6 +57,7 @@ class MyApp extends StatelessWidget {
       ),
       providers: [
         ChangeNotifierProvider(create: (_) => AgoraService()),
+        ChangeNotifierProvider(create: (_) => ChatHelper()),
         ChangeNotifierProvider(create: (_) => NotificationHelper()),
         ChangeNotifierProvider(create: (_) => SingleChatsHelper()),
         ChangeNotifierProvider(create: (_) => SingleChatMessageHelper()),

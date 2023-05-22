@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:sm/screen/live_streaming/agora_service/agora_service.dart';
+import 'package:uuid/uuid.dart';
 import 'package:wakelock/wakelock.dart';
 import 'dart:math' as math;
 
@@ -29,11 +30,15 @@ import '../utils/setting.dart';
 class CallPage extends StatefulWidget {
   /// non-modifiable channel name of the page
   final String channelName;
-
+  final String channelId;
+  final String uid;
+  final bool isBroadcaster;
   final String image;
   final time;
   /// Creates a call page with given channel name.
-  const CallPage({Key? key, required this.channelName, this.time,required this.image}) : super(key: key);
+  const CallPage({Key? key, required this.channelName,required this.uid,
+    required this.channelId, this.time,required this.image,
+    required this.isBroadcaster}) : super(key: key);
 
   @override
   _CallPageState createState() => _CallPageState();
@@ -42,7 +47,7 @@ class CallPage extends StatefulWidget {
 class _CallPageState extends State<CallPage>{
   static final _users = <int>[];
   List<User> userList = [];
-  String baseUrl = 'https://agora-token-service-production-76e6.up.railway.app'; //Add the link to your deployed server here
+  //String baseUrl = 'https://agora-token-service-production-76e6.up.railway.app'; //Add the link to your deployed server here
   int uid = 0;
   String? token;
 
@@ -100,7 +105,7 @@ class _CallPageState extends State<CallPage>{
 
   _storeLiveInFirebase(){
     Provider.of<FirebaseOperation>(context, listen: false)
-        .uploadPostData(widget.channelName, {
+        .uploadPostData(widget.channelId, {
       'post_image': 'https://firebasestorage.googleapis.com/v0/b/social-9064f.appspot.com/o/posts%2Fdata%2Fuser%2F0%2'
           'Fcom.example.sm%2Fcache%2Fvideo_live.png?alt=media&token=2ae211f6-1ef3-400c-b2c9-097569ec0660',
       'caption':'Live',
@@ -111,9 +116,9 @@ class _CallPageState extends State<CallPage>{
       'user_image':
       Provider.of<FirebaseOperation>(context, listen: false)
           .getUserImage,
-      'user_uid':
-      Provider.of<Authentication>(context, listen: false)
-          .getUserUid,
+      'user_uid': widget.uid,//Uuid().v1(),
+      // Provider.of<Authentication>(context, listen: false)
+      //     .getUserUid,
       'time': Timestamp.now(),
       'user_email':
       Provider.of<FirebaseOperation>(context, listen: false)
@@ -158,7 +163,9 @@ class _CallPageState extends State<CallPage>{
     // await _engine.setParameters(
     //     '''{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}''');
     //await getToken();
-    await _engine.joinChannel(Provider.of<AgoraService>(context, listen: false).getLiveToken, widget.channelName, null, 0);
+    await _engine.joinChannel(
+        Provider.of<AgoraService>(context, listen: false).getLiveToken,
+        widget.channelId, null, 0);
   }
 
   /// Create agora sdk instance and initialize
@@ -168,13 +175,15 @@ class _CallPageState extends State<CallPage>{
     _engine = await RtcEngine.create(APP_ID);
     //await RtcEngine.enableVideo();
     // await RtcEngine.enableLocalAudio(true);
-    await _engine.enableLocalVideo(true);
+    //await _engine.enableLocalVideo(true);
+    await _engine.enableLocalAudio(true);
     //_engine = await RtcEngine.createWithConfig(RtcEngineConfig(APP_ID));
     await _engine.enableVideo();
-    await _engine.enableLocalAudio(true);
-   // await _engine.setChannelProfile(ChannelProfile.LiveBroadcasting);
+    await _engine.startPreview();
+    await _engine.enableLocalVideo(true);
+   await _engine.setChannelProfile(ChannelProfile.LiveBroadcasting);
    // if (widget.isBroadcaster) {
-      //await _engine.setClientRole(ClientRole.Broadcaster);
+      await _engine.setClientRole(ClientRole.Broadcaster);
    // } else {
    //    await _engine.setClientRole(ClientRole.Audience);
    //  }

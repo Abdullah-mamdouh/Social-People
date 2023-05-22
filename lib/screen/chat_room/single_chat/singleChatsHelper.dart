@@ -71,7 +71,7 @@ class SingleChatsHelper with ChangeNotifier{
                         return friendData != null ? Container(
                           child: ListTile(
                             onTap: () {
-                              Navigator.pushReplacement(
+                              Navigator.push(
                                   context,
                                   PageTransition(
                                       child: SingleMessage(

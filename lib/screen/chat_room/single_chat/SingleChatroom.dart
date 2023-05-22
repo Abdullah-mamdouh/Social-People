@@ -48,7 +48,7 @@ class _SingleChatroomState extends State<SingleChatroom> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               CircleAvatar(
-                                backgroundColor: constantColors.greyColor,
+                                backgroundColor: ConstantColors.greyColor,
                                 backgroundImage: NetworkImage(
                                     Provider.of<FirebaseOperation>(context, listen: false)
                                         .getUserImage,
