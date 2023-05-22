@@ -7,6 +7,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
+import 'package:sm/screen/alt_profile/chat_helper.dart';
+import 'package:sm/screen/alt_profile/chat_page.dart';
 import 'package:sm/screen/chat_room/group_chat/chatRoomHelper.dart';
 import 'package:sm/screen/chat_room/single_chat/SingleChatroom.dart';
 import 'package:sm/screen/home_page/homePage.dart';
@@ -369,7 +371,29 @@ class AltProfileHlper with ChangeNotifier {
                           fontWeight: FontWeight.bold,
                           fontSize: 16),
                     ),
-                    onPressed: () {
+                    onPressed: () async{
+                      bool isExist = await Provider.of<ChatHelper>(context, listen: false).
+                      isChatExist(Provider.of<Authentication>(context, listen: false).getUserUid, userUid);
+                      if(isExist){
+                        Navigator.pushReplacement(
+                            context,
+                            PageTransition(
+                                child: ChatPage(arguments: ChatPageArguments(peerId: userUid, peerAvatar: snapshot.data!['user_image'], peerNickname: 'peerNickname')),
+                                type: PageTransitionType.leftToRight));
+                        }else{
+
+                        Provider.of<ChatHelper>(context, listen: false).createChat('123',
+                            {
+                              'id':12,
+
+                            });
+                        Navigator.pushReplacement(
+                            context,
+                            PageTransition(
+                                child: ChatPage(arguments: ChatPageArguments(peerId: userUid, peerAvatar: snapshot.data!['user_image'], peerNickname: 'peerNickname')),
+                                type: PageTransitionType.leftToRight));
+                      }
+                      /*
                       // print(userUid+ chatID.toString());
 
                       //return createChat(context, userUid);
@@ -632,6 +656,7 @@ class AltProfileHlper with ChangeNotifier {
                      */
                       // Provider.of<ChatRoomHelper>(context, listen: false)
                       //     .showChatroom(context);
+                      */
                     }),
               ],
             ),

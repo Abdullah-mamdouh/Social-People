@@ -9,12 +9,14 @@ import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/alt_profile/altProfile.dart';
 import 'package:sm/screen/live_streaming/agora_service/agora_service.dart';
+import 'package:sm/screen/live_streaming/test.dart';
 import 'package:sm/screen/live_streaming/utils/setting.dart';
 import 'package:sm/screen/stories/stories.dart';
 import 'package:sm/service/authentication.dart';
 import 'package:sm/utils/postOption.dart';
 import 'package:sm/utils/uploadPost.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 import '../../service/firebaseOperation.dart';
 import '../live_streaming/agora/host.dart';
 import '../live_streaming/agora/join.dart';
@@ -29,8 +31,7 @@ class FeedHelper with ChangeNotifier {
       actions: [
         IconButton(
           onPressed: () {
-            Provider.of<AgoraService>(context, listen: false).
-            getToken(Provider.of<FirebaseOperation>(context,listen: false).getUserName,).whenComplete(() =>  onCreate(context));
+                onCreate(context);
           },
           icon: Image.asset('asstes/icons/live.png',fit: BoxFit.cover),),
         IconButton(
@@ -355,10 +356,16 @@ class FeedHelper with ChangeNotifier {
                   onTap: (){
                     if(document['caption'] == 'Live'){
                       //print('ghbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbj');
-                      onJoin(context,channelName: document['user_name'],channelId: APP_ID,token: document['token'],
-                          hostImage: document['user_image'],userImage: Provider.of<FirebaseOperation>(context,listen: false)
-                              .getUserImage,username: Provider.of<FirebaseOperation>(context,listen: false)
-                              .getUserName);
+                      // Provider.of<AgoraService>(context, listen: false).
+                      // getToken(document['user_name'],
+                      //     '33').whenComplete(() =>
+                      onJoin(context,hostName: document['user_name'],
+                          hostImage: document['user_image'],
+                          userImage: Provider.of<FirebaseOperation>(context,listen: false).getUserImage,
+                          username: Provider.of<FirebaseOperation>(context,listen: false).getUserName,
+                          hostUid: document['user_uid'],
+                      );
+                   // );
                     }
                   },
                   child: Padding(
@@ -583,11 +590,22 @@ class FeedHelper with ChangeNotifier {
     await _handleCameraAndMic();
     var date = DateTime.now();
     var currentTime = '${DateFormat("dd-MM-yyyy hh:mm:ss").format(date)}';
+    String uid = Uuid().v1();
     // push video page with given channel name
-    await Navigator.push(
+    await Provider.of<AgoraService>(context, listen: false).
+    getToken(uid + Provider.of<FirebaseOperation>(context,listen: false).getUserName,
+        uid).whenComplete(() => Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CallPage(
+        builder: (context) =>
+            // BroadcastScreen(isBroadcaster: true,
+            // username: Provider.of<FirebaseOperation>(context).getUserName,
+            // channelId: uid + Provider.of<FirebaseOperation>(context).getUserName,
+            // uid: uid)
+            CallPage(
+              isBroadcaster: true,
+          uid :'22',
+          channelId: uid + Provider.of<FirebaseOperation>(context).getUserName,
           channelName: Provider.of<FirebaseOperation>(context)
               .getUserName,
           time: currentTime ,
@@ -595,26 +613,37 @@ class FeedHelper with ChangeNotifier {
               .getUserImage,
         ),
       ),
-    );
+    ));
 
   }
 
-  Future<void> onJoin(BuildContext context,{channelName,channelId,token, username, hostImage, userImage}) async {
+  Future<void> onJoin(BuildContext context,{hostName, username, hostImage, hostUid, userImage}) async {
     // update input validation
-    if (channelName.isNotEmpty) {
+    if (hostName.isNotEmpty) {
       // push video page with given channel name
-      await Navigator.push(
+      String uid = Uuid().v1();
+      await Provider.of<AgoraService>(context, listen: false).
+      getToken(uid + hostName,
+          uid).whenComplete(() =>
+          Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => JoinPage(
-            channelName: channelName,
-            channelId: channelId,
-            token: token,
+          builder: (context) =>
+              // BroadcastScreen(isBroadcaster: false,
+              // channelId: channelId,
+              // username: username,
+              // uid: uid)
+              JoinPage(
+            channelName: hostName,
+            channelId: uid + hostName,
+            token: Provider.of<AgoraService>(context, listen: false).getLiveToken,
             username: username,
             hostImage: hostImage,
             userImage: userImage,
+            userUid: '30',
           ),
         ),
+          ),
       );
     }
   }

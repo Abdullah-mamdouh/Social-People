@@ -15,6 +15,7 @@ import 'package:wakelock/wakelock.dart';
 import 'dart:math' as math;
 import '../HearAnim.dart';
 import '../Loading.dart';
+import '../agora_service/agora_service.dart';
 import '../firebaseDB/firestoreDB.dart';
 import '../models/message.dart';
 import '../utils/setting.dart';
@@ -27,12 +28,12 @@ class JoinPage extends StatefulWidget {
   final String username;
   final String hostImage;
   final String userImage;
-
+  final String userUid;
 
 
   /// Creates a call page with given channel name.
   const JoinPage({Key? key, required this.channelName, required this.channelId,
-    required this.token, required this.username,
+    required this.token, required this.username, required this.userUid,
     required this.hostImage,required this.userImage}) : super(key: key);
 
 
@@ -62,7 +63,7 @@ class _JoinPageState extends State<JoinPage> {
   late RtcEngine _engine;
   late RtcChannel channel;
   ChannelMediaOptions? options;
-  String baseUrl = 'https://agora-token-service-production-76e6.up.railway.app'; //Add the link to your deployed server here
+  //String baseUrl = 'https://agora-token-service-production-76e6.up.railway.app'; //Add the link to your deployed server here
   //Love animation
   final _random = math.Random();
   Timer? _timer;
@@ -98,7 +99,7 @@ class _JoinPageState extends State<JoinPage> {
     // await _engine.enableWebSdkInteroperability(true);
     // await _engine.setParameters(
     //     '''{\"che.video.lowBitRateStreamParameter\":{\"width\":320,\"height\":180,\"frameRate\":15,\"bitRate\":140}}''');
-    await _engine.joinChannel(widget.token, widget.channelName, null, 0);
+    await _engine.joinChannelWithUserAccount( widget.token, widget.channelId, widget.userUid);
   }
 
   /// Create agora sdk instance and initialize
@@ -108,11 +109,12 @@ class _JoinPageState extends State<JoinPage> {
     //_engine = await RtcEngine.createWithConfig(RtcEngineConfig(APP_ID));
     _engine = await RtcEngine.create(APP_ID);
     await _engine.enableVideo();
-    await _engine.muteLocalAudioStream(true);
-    await _engine.enableLocalAudio(false);
+   await _engine.startPreview();
+    // await _engine.muteLocalAudioStream(true);
+    // await _engine.enableLocalAudio(false);
     await _engine.setClientRole(ClientRole.Audience);
     //await _engine.enableLocalVideo(!muted);
-    await _engine.enableLocalVideo(true);
+    //rawait _engine.enableLocalVideo(true);
     // channel = await RtcChannel.create(widget.channelName);
     // _addRtcChannelEventHandlers();
     //await _engine.setClientRole(ClientRole.Audience);
@@ -196,6 +198,7 @@ class _JoinPageState extends State<JoinPage> {
   List<Widget> _getRenderViews() {
     final List<StatefulWidget> list = [];
     list.add(RtcLocalView.SurfaceView());
+    //list.add(RtcRemoteView.SurfaceView(uid: 30));
     _users.forEach((int uid) => list.add(RtcRemoteView.SurfaceView(uid: uid)));
     if(accepted == true){
       list.add(RtcLocalView.SurfaceView());
@@ -951,7 +954,7 @@ class _JoinPageState extends State<JoinPage> {
         });
       }
     };
-    await _client!.login(null, widget.username );
+    await _client!.login(widget.token, widget.userUid );
     _channel = await _createChannel(widget.channelName);
     await _channel!.join();
     var len;
