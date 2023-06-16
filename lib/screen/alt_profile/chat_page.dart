@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sm/screen/alt_profile/chat_helper.dart';
+import 'package:sm/service/authentication.dart';
 
 import '../../constant/Constantcolors.dart';
 import '../../constant/firestore_constants.dart';
@@ -23,12 +24,12 @@ class ChatPage extends StatefulWidget {
 }
 
 class ChatPageState extends State<ChatPage> {
-  late final String currentUserId;
+  String currentUserId = '';
 
   List<QueryDocumentSnapshot> listMessage = [];
   int _limit = 20;
   int _limitIncrement = 20;
-  String groupChatId = "";
+  //String groupChatId = "";
 
   File? imageFile;
   bool isLoading = false;
@@ -45,6 +46,7 @@ class ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
+    currentUserId = Provider.of<Authentication>(context, listen: false).getUserUid;
     focusNode.addListener(onFocusChange);
     listScrollController.addListener(_scrollListener);
     //readLocal();
@@ -139,7 +141,7 @@ class ChatPageState extends State<ChatPage> {
   void onSendMessage(String content, int type) {
     if (content.trim().isNotEmpty) {
       textEditingController.clear();
-      Provider.of<ChatHelper>(context, listen: false).sendMessage(content, type, groupChatId, currentUserId, widget.arguments.peerId);
+      Provider.of<ChatHelper>(context, listen: false).sendMessage(content, type, Provider.of<Authentication>(context, listen: false).getUserUid, widget.arguments.peerId);
       if (listScrollController.hasClients) {
         listScrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
       }
@@ -646,9 +648,11 @@ class ChatPageState extends State<ChatPage> {
 
   Widget buildListMessage() {
     return Flexible(
-      child: groupChatId.isNotEmpty
-          ? StreamBuilder<QuerySnapshot>(
-              stream: Provider.of<ChatHelper>(context, listen: false).getChatStream(groupChatId, _limit),
+      child:
+      // groupChatId.isNotEmpty
+      //     ?
+      StreamBuilder<QuerySnapshot>(
+              stream: Provider.of<ChatHelper>(context, listen: false).getChatStream(widget.arguments.chatId, _limit),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasData) {
                   listMessage = snapshot.data!.docs;
@@ -672,19 +676,18 @@ class ChatPageState extends State<ChatPage> {
                 }
               },
             )
-          : Center(
-              child: CircularProgressIndicator(
-                color: ConstantColors.themeColor,
-              ),
-            ),
+          // : Center(
+          //     child: Image.asset('asstes/images/empty.png'),
+          //   ),
     );
   }
 }
 
 class ChatPageArguments {
+  final String chatId;
   final String peerId;
   final String peerAvatar;
   final String peerNickname;
 
-  ChatPageArguments({required this.peerId, required this.peerAvatar, required this.peerNickname});
+  ChatPageArguments({required this.chatId, required this.peerId, required this.peerAvatar, required this.peerNickname});
 }

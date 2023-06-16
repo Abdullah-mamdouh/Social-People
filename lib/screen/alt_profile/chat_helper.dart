@@ -16,11 +16,11 @@ class ChatHelper with ChangeNotifier {
     return uploadTask;
   }
 
-  void sendMessage(String content, int type, String groupChatId, String currentUserId, String peerId) {
+  void sendMessage(String content, int type, String currentUserId, String peerId) {
     DocumentReference documentReference = FirebaseFirestore.instance
         .collection('singlechats')
         .doc(groupChatId)
-        .collection(groupChatId)
+        .collection('messages')
         .doc(DateTime.now().millisecondsSinceEpoch.toString());
 
     MessageChat messageChat = MessageChat(
@@ -40,17 +40,18 @@ class ChatHelper with ChangeNotifier {
   }
 
 
-  Stream<QuerySnapshot> getChatStream(String groupChatId, int limit) {
+  Stream<QuerySnapshot> getChatStream(String chatId, int limit) {
     return FirebaseFirestore.instance
         .collection(FirestoreConstants.pathMessageCollection)
-        .doc(groupChatId)
-        .collection(groupChatId)
+        .doc(chatId)
+        .collection('messages')
         .orderBy(FirestoreConstants.timestamp, descending: true)
         .limit(limit)
         .snapshots();
   }
 
-  createChat(String groupChatId, dynamic data){
+  createChat(String currentId, String peerId, dynamic data){
+    createGroupId(currentId, peerId);
     FirebaseFirestore.instance
         .collection(FirestoreConstants.pathMessageCollection)
         .doc(groupChatId).set(data);

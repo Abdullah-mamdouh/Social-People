@@ -371,26 +371,53 @@ class AltProfileHlper with ChangeNotifier {
                           fontWeight: FontWeight.bold,
                           fontSize: 16),
                     ),
-                    onPressed: () async{
-                      bool isExist = await Provider.of<ChatHelper>(context, listen: false).
-                      isChatExist(Provider.of<Authentication>(context, listen: false).getUserUid, userUid);
-                      if(isExist){
-                        Navigator.pushReplacement(
+                    onPressed: () async {
+                      bool isExist =
+                          await Provider.of<ChatHelper>(context, listen: false)
+                              .isChatExist(
+                                  Provider.of<Authentication>(context,
+                                          listen: false)
+                                      .getUserUid,
+                                  userUid);
+                      if (isExist) {
+                        Navigator.push(
                             context,
                             PageTransition(
-                                child: ChatPage(arguments: ChatPageArguments(peerId: userUid, peerAvatar: snapshot.data!['user_image'], peerNickname: 'peerNickname')),
+                                child: ChatPage(
+                                    arguments: ChatPageArguments(
+                                        chatId: Provider.of<ChatHelper>(context,
+                                                listen: false)
+                                            .groupChatId!,
+                                        peerId: userUid,
+                                        peerAvatar:
+                                            snapshot.data!['user_image'],
+                                        peerNickname: 'peerNickname')),
                                 type: PageTransitionType.leftToRight));
-                        }else{
-
-                        Provider.of<ChatHelper>(context, listen: false).createChat('123',
-                            {
-                              'id':12,
-
+                      } else {
+                        Provider.of<ChatHelper>(context, listen: false)
+                            .createChat(
+                                Provider.of<Authentication>(context,
+                                        listen: false)
+                                    .getUserUid,
+                                userUid,
+                                {
+                              'member1': Provider.of<Authentication>(context,
+                                      listen: false)
+                                  .getUserUid,
+                              'member2': userUid,
                             });
-                        Navigator.pushReplacement(
+                        Navigator.push(
                             context,
                             PageTransition(
-                                child: ChatPage(arguments: ChatPageArguments(peerId: userUid, peerAvatar: snapshot.data!['user_image'], peerNickname: 'peerNickname')),
+                                child: ChatPage(
+                                    arguments: ChatPageArguments(
+                                        chatId: Provider.of<ChatHelper>(context,
+                                                listen: false)
+                                            .groupChatId!,
+                                        peerId: userUid,
+                                        peerAvatar:
+                                            snapshot.data!['user_image'],
+                                        peerNickname: 'peerNickname')),
                                 type: PageTransitionType.leftToRight));
                       }
                       /*
