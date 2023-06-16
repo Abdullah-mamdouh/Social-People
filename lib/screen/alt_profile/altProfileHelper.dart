@@ -407,6 +407,7 @@ class AltProfileHlper with ChangeNotifier {
                               'member2': userUid,
                             });
                         Navigator.push(
+
                             context,
                             PageTransition(
                                 child: ChatPage(
