@@ -17,6 +17,7 @@ class ChatHelper with ChangeNotifier {
   }
 
   void sendMessage(String content, int type, String currentUserId, String peerId) {
+    createGroupId(currentUserId, peerId);
     DocumentReference documentReference = FirebaseFirestore.instance
         .collection('singlechats')
         .doc(groupChatId)

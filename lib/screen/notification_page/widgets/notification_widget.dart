@@ -33,7 +33,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
           ),
         ),
         title: Text(
-          'notifications'.toString(),
+          'notifications',
           style: TextStyle(
               color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
         ),

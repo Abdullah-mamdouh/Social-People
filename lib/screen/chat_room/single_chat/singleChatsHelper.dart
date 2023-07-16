@@ -15,7 +15,7 @@ import '../../../models/user_chat.dart';
 import '../../alt_profile/chat_page.dart';
 
 class SingleChatsHelper with ChangeNotifier {
-  ConstantColors constantColors = new ConstantColors();
+  ConstantColors constantColors =  ConstantColors();
 
   String lastMessageTime = '';
   String get getlastMessageTime => lastMessageTime;
@@ -42,7 +42,14 @@ class SingleChatsHelper with ChangeNotifier {
               return ListView.builder(
                 padding: EdgeInsets.all(20),
                 itemBuilder: (context, index) {
-                  return buildItem(context, snapshot.data?.docs[index]);
+                  print(snapshot.data?.docs[index]['members'][0]);
+                  var data = snapshot.data?.docs[index]['members'];
+                  var currentUser = Provider.of<Authentication>(context, listen: false).getUserUid;
+                  if(data[0]['user_uid'] == currentUser)
+                    return buildItem(context, snapshot.data?.docs[index].id, data[1]);
+                  else if(data[1]['user_uid'] == currentUser)
+                    return buildItem(context, snapshot.data?.docs[index].id, data[0]);
+                  return Container();
                 },
                 itemCount: snapshot.data?.docs.length,
               );
@@ -298,20 +305,23 @@ class SingleChatsHelper with ChangeNotifier {
           }),*/
     );
   }
-  Widget buildItem(BuildContext context, DocumentSnapshot? document) {
+  Widget buildItem(BuildContext context,String? id, var document) {
     if (document != null) {
-      UserChat userChat = UserChat.fromDocument(document);
+      //UserChat userChat = UserChat.fromDocument(document);
       // if (userChat.id == currentUserId) {
       //   return SizedBox.shrink();
       // } else {
+      print(document.toString());
         return Container(
           child: TextButton(
             child: Row(
               children: <Widget>[
                 Material(
-                  child: userChat.photoUrl.isNotEmpty
-                      ? Image.network(
-                    userChat.photoUrl,
+                  child:
+            // userChat.photoUrl.isNotEmpty
+            //           ?
+            Image.network(document['user_image'],
+                    //userChat.photoUrl,
                     fit: BoxFit.cover,
                     width: 50,
                     height: 50,
@@ -334,15 +344,15 @@ class SingleChatsHelper with ChangeNotifier {
                       return Icon(
                         Icons.account_circle,
                         size: 50,
-                        //color: ColorConstants.greyColor,
+                        color: constantColors.greyColor,
                       );
                     },
-                  )
-                      : Icon(
-                    Icons.account_circle,
-                    size: 50,
-                    //color: ColorConstants.greyColor,
                   ),
+                  //     : Icon(
+                  //   Icons.account_circle,
+                  //   size: 50,
+                  //   //color: ColorConstants.greyColor,
+                  // ),
                   borderRadius: BorderRadius.all(Radius.circular(25)),
                   clipBehavior: Clip.hardEdge,
                 ),
@@ -352,18 +362,18 @@ class SingleChatsHelper with ChangeNotifier {
                       children: <Widget>[
                         Container(
                           child: Text(
-                            'Nickname: ${userChat.nickname}',
+                            'Nickname: ${document['user_name']}, ',//'${userChat.nickname}',
                             maxLines: 1,
-                            //style: TextStyle(color: ColorConstants.primaryColor),
+                            style: TextStyle(color: constantColors.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
                           margin: EdgeInsets.fromLTRB(10, 0, 0, 5),
                         ),
                         Container(
                           child: Text(
-                            'About me: ${userChat.aboutMe}',
+                            'About me: ',//${userChat.aboutMe}',
                             maxLines: 1,
-                            //style: TextStyle(color: colorConstants.primaryColor),
+                            style: TextStyle(color: constantColors.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
                           margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
@@ -376,18 +386,15 @@ class SingleChatsHelper with ChangeNotifier {
               ],
             ),
             onPressed: () {
-              // if (Utilities.isKeyboardShowing()) {
-              //   Utilities.closeKeyboard(context);
-              // }
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ChatPage(
                     arguments: ChatPageArguments(
-                      chatId: document.id,
-                      peerId: userChat.id,
-                      peerAvatar: userChat.photoUrl,
-                      peerNickname: userChat.nickname,
+                      chatId: id!,
+                      peerId:document['user_uid'],// userChat.id,
+                      peerAvatar: document['user_image'],//userChat.photoUrl,
+                      peerNickname: document['user_name'],//userChat.nickname,
                     ),
                   ),
                 ),
