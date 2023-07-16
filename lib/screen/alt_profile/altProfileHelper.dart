@@ -394,6 +394,28 @@ class AltProfileHlper with ChangeNotifier {
                                         peerNickname: 'peerNickname')),
                                 type: PageTransitionType.leftToRight));
                       } else {
+                        List members = [
+                          {
+                            'user_uid': Provider.of<Authentication>(context,
+                                listen: false)
+                                .getUserUid,
+                            'user_image': Provider.of<FirebaseOperation>(context,
+                                listen: false)
+                                .getUserImage,
+                            'user_name': Provider.of<FirebaseOperation>(context,
+                                listen: false)
+                                .getUserName,
+                            'user_email': Provider.of<FirebaseOperation>(context,
+                                listen: false)
+                                .getUserEmail,
+                          },
+                          {
+                            'user_uid': userUid,
+                            'user_image': snapshot.data!['user_image'],
+                            'user_name': snapshot.data!['user_name'],
+                            'user_email': snapshot.data!['user_email'],
+                          }
+                        ];
                         Provider.of<ChatHelper>(context, listen: false)
                             .createChat(
                                 Provider.of<Authentication>(context,
@@ -401,13 +423,9 @@ class AltProfileHlper with ChangeNotifier {
                                     .getUserUid,
                                 userUid,
                                 {
-                              'member1': Provider.of<Authentication>(context,
-                                      listen: false)
-                                  .getUserUid,
-                              'member2': userUid,
+                                  'members': FieldValue.arrayUnion(members),
                             });
                         Navigator.push(
-
                             context,
                             PageTransition(
                                 child: ChatPage(
@@ -418,7 +436,7 @@ class AltProfileHlper with ChangeNotifier {
                                         peerId: userUid,
                                         peerAvatar:
                                             snapshot.data!['user_image'],
-                                        peerNickname: 'peerNickname')),
+                                        peerNickname: snapshot.data!['user_name'])),
                                 type: PageTransitionType.leftToRight));
                       }
                       /*

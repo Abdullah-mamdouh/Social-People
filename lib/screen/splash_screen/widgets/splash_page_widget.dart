@@ -5,6 +5,7 @@ import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/landing_page/landingPage.dart';
+import 'package:sm/screen/notification_page/notification_services.dart';
 
 import '../../../utils/theme_mode/theme.dart';
 
@@ -17,8 +18,18 @@ class SplashPageWidget extends StatefulWidget {
 
 class _SplashPageWidgetState extends State<SplashPageWidget> {
   ConstantColors constantColors = new ConstantColors();
+
+  NotificationServices notificationServices = NotificationServices();
+
   @override
   void initState() {
+    notificationServices.requestNotificationPermission();
+    notificationServices.firebaaseInit(context);
+    notificationServices.setupInteractMessage(context);
+    notificationServices.getDeviceToken().then((value) {
+      print('device Token');
+      print(value);
+    });
     Timer(
         Duration(
           seconds: 1,

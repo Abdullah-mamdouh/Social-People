@@ -60,7 +60,7 @@ class GroupChatSearching extends SearchDelegate {
                       children: [
                         CircleAvatar(
                           backgroundImage: NetworkImage(document['room_image']),
-                          backgroundColor: ConstantColors.greyColor,
+                          backgroundColor: constantColors.greyColor,
                         ),
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.01,

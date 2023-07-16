@@ -57,6 +57,9 @@ dependencies:
   permission_handler:
   gradient_text:
   flare_flutter:
+  firebase_messaging: ^13.1.0
+  flutter_local_notifications: ^12.0.4
+  app_settings: ^4.1.6
 
 dev_dependencies:
   flutter_test:

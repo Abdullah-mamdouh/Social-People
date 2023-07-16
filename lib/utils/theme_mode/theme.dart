@@ -75,7 +75,7 @@ class MyThemes {
     //buttonTheme: ButtonThemeData(buttonColor: constantColors.yellowColor),
     elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle( minimumSize: MaterialStateProperty.all<Size>(Size(double.infinity,52)),
-          textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: ConstantColors.greyColor,)),
+          textStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: constantColors.greyColor,)),
           backgroundColor: MaterialStateProperty.all<Color>(constantColors.greenColor),)),
 
     // iconTheme: IconThemeData(color: Colors.purple.shade200, opacity: 0.8),
