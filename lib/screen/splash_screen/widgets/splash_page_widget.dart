@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/landing_page/landingPage.dart';
 import 'package:sm/screen/notification_page/notification_services.dart';
+import 'package:sm/screen/notification_page/notiication_helper.dart';
 
 import '../../../utils/theme_mode/theme.dart';
 
@@ -30,6 +31,7 @@ class _SplashPageWidgetState extends State<SplashPageWidget> {
       print('device Token');
       print(value);
     });
+    Provider.of<NotificationHelper>(context, listen: false).getUserToken();
     Timer(
         Duration(
           seconds: 1,

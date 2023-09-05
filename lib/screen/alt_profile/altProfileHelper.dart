@@ -389,9 +389,11 @@ class AltProfileHlper with ChangeNotifier {
                                                 listen: false)
                                             .groupChatId!,
                                         peerId: userUid,
-                                        peerAvatar:
-                                            snapshot.data!['user_image'],
-                                        peerNickname: 'peerNickname')),
+                                        peerAvatar: snapshot.data!['user_image'],
+                                        peerNickname: snapshot.data!['user_name'],
+                                        peerToken: snapshot.data!['user_token']
+                                    ),
+                                ),
                                 type: PageTransitionType.leftToRight));
                       } else {
                         List members = [
@@ -408,12 +410,15 @@ class AltProfileHlper with ChangeNotifier {
                             'user_email': Provider.of<FirebaseOperation>(context,
                                 listen: false)
                                 .getUserEmail,
+                            'user_token': Provider.of<FirebaseOperation>(context,
+                                listen: false).getUserToken,
                           },
                           {
                             'user_uid': userUid,
                             'user_image': snapshot.data!['user_image'],
                             'user_name': snapshot.data!['user_name'],
                             'user_email': snapshot.data!['user_email'],
+                            'user_token': snapshot.data!['user_token'],
                           }
                         ];
                         Provider.of<ChatHelper>(context, listen: false)
@@ -434,10 +439,11 @@ class AltProfileHlper with ChangeNotifier {
                                                 listen: false)
                                             .groupChatId!,
                                         peerId: userUid,
-                                        peerAvatar:
-                                            snapshot.data!['user_image'],
-                                        peerNickname: snapshot.data!['user_name'])),
-                                type: PageTransitionType.leftToRight));
+                                        peerAvatar: snapshot.data!['user_image'],
+                                        peerNickname: snapshot.data!['user_name'],
+                                        peerToken: snapshot.data!['user_token'],
+                                    ),),
+                                type: PageTransitionType.leftToRight),);
                       }
                       /*
                       // print(userUid+ chatID.toString());
@@ -703,7 +709,7 @@ class AltProfileHlper with ChangeNotifier {
                       // Provider.of<ChatRoomHelper>(context, listen: false)
                       //     .showChatroom(context);
                       */
-                    }),
+                    },),
               ],
             ),
           ),
