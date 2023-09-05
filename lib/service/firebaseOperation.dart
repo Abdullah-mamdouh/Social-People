@@ -6,17 +6,21 @@ import 'package:sm/screen/landing_page/landingUtils.dart';
 import 'package:sm/service/authentication.dart';
 import 'package:uuid/uuid.dart';
 
+import '../screen/notification_page/notiication_helper.dart';
+
 class FirebaseOperation with ChangeNotifier {
   late UploadTask imageUploadTask;
   String initUserName = '';
   String initUserEmail = '';
   String initUserImage = '';
+  String initUserToken = '';
   String get getUserName => initUserName;
   String get getUserEmail => initUserEmail;
   String get getUserImage => initUserImage;
+  String get getUserToken => initUserToken;
   late var uuid = Uuid();
 
-  Future uploadUserAvatar(BuildContext context) async {
+  uploadUserAvatar(BuildContext context) async {
     Reference imageReferenc = FirebaseStorage.instance.ref().child(
         'userProfileAvatar/${Provider.of<LandingUtils>(context, listen: false).getUserAvatar.path}/${TimeOfDay.now()}');
 
@@ -43,6 +47,13 @@ class FirebaseOperation with ChangeNotifier {
         .set(data);
   }
 
+  Future updateUserCollectin(BuildContext context, dynamic data) async {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(Provider.of<Authentication>(context, listen: false).getUserUid)
+        .update(data);
+  }
+
   Future initUserDate(BuildContext context) async {
     debugPrint(Provider.of<Authentication>(context, listen: false).getUserUid);
     return FirebaseFirestore.instance
@@ -55,7 +66,17 @@ class FirebaseOperation with ChangeNotifier {
       initUserName = doc['user_name'];
       initUserEmail = doc['user_email'];
       initUserImage = doc['user_image'];
+      initUserToken = doc['user_token'];
 
+      updateUserCollectin(context, {
+        'user_password': doc['user_password'],
+        'user_uid': doc['user_uid'],
+        'user_email': doc['user_email'],
+        'user_name': doc['user_name'],
+        'user_image': doc['user_image'],
+        'user_token':  Provider.of<NotificationHelper>(context,
+            listen: false).userToken,
+      });
       debugPrint(initUserName);
       debugPrint(initUserEmail);
       debugPrint(initUserImage);

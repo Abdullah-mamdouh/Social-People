@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:sm/models/notification_class.dart';
 import 'package:sm/screen/alt_profile/chat_helper.dart';
 import 'package:sm/screen/notification_page/notification_services.dart';
+import 'package:sm/screen/notification_page/notiication_helper.dart';
 import 'package:sm/service/authentication.dart';
 
 import '../../constant/Constantcolors.dart';
@@ -708,13 +709,12 @@ class ChatPageState extends State<ChatPage> {
 
                   Data d = Data(id: '5647546', type: 'msj');
                   NotificationData nd = NotificationData(
-                      body: 'enoun', title: textEditingController.text);
+                      body: textEditingController.text, title: widget.arguments.peerNickname);
                   NotificationClass n = NotificationClass(
                       data: d,
                       notification: nd,
                       priority: 'high',
-                      to: 'fswjAA7qQSSa3r-a496UBj:APA91bFMaY-kUMmqajVLuqIcZB04EpeZoTkgE868daJPG062ltmx9PCvViwOse1'
-                          '_MgSUajBaD9xmJe3J59KJFnSuloJjbRpBFH5W6YRbedqX0_VqgTXJFxtlKvfN-rdqV9Ee2TkSxZtr');
+                      to: Provider.of<NotificationHelper>(context, listen: false).userToken);
                   NotificationServices().sendNotification(n);
                   onSendMessage(textEditingController.text, TypeMessage.text);
                 },
@@ -779,10 +779,12 @@ class ChatPageArguments {
   final String peerId;
   final String peerAvatar;
   final String peerNickname;
+  final String peerToken;
 
   ChatPageArguments(
       {required this.chatId,
       required this.peerId,
       required this.peerAvatar,
-      required this.peerNickname});
+      required this.peerNickname,
+      required this.peerToken,});
 }

@@ -7,17 +7,21 @@ import 'package:provider/provider.dart';
 import 'package:sm/constant/Constantcolors.dart';
 import 'package:sm/screen/home_page/homePage.dart';
 import 'package:sm/screen/landing_page/landingUtils.dart';
+import 'package:sm/screen/notification_page/notification_services.dart';
 import 'package:sm/service/authentication.dart';
 import 'package:sm/service/firebaseOperation.dart';
 import 'package:sm/service/user_db_service/user_db.dart';
 import 'package:sm/utils/exceptions/server_exception.dart';
 import 'package:sm/widget/textFieldClass.dart';
 
+import '../notification_page/notiication_helper.dart';
+
 class LandingService with ChangeNotifier {
   ConstantColors constantColors = new ConstantColors();
   TextEditingController _nameController = new TextEditingController();
   TextEditingController _passwordController = new TextEditingController();
   TextEditingController _emailController = new TextEditingController();
+  NotificationServices notificationServices = NotificationServices();
 
   showUserAvatar(BuildContext context) {
     return showModalBottomSheet(
@@ -123,7 +127,7 @@ class LandingService with ChangeNotifier {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   IconButton(
-                    onPressed: () {
+                    onPressed: () async{
                       Provider.of<Authentication>(context, listen: false)
                           .logIntoAccount(
                               document['user_email'], document['user_password'])
@@ -210,9 +214,9 @@ class LandingService with ChangeNotifier {
                       onPressed: () {
                         if (_emailController.text.isNotEmpty ||
                             _passwordController.text.isNotEmpty) {
-                          Provider.of<Authentication>(context, listen: false)
-                              .logIntoAccount(_emailController.text,
-                                  _passwordController.text)
+                            Provider.of<Authentication>(context, listen: false)
+                                .logIntoAccount(_emailController.text,
+                                _passwordController.text)
                               .whenComplete(() {
                             Navigator.pushReplacement(
                                 context,
